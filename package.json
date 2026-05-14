@@ -1,0 +1,28 @@
+{
+  "name": "e-store",
+  "version": "1.0.0",
+  "description": "Backend of E-commerce",
+  "homepage": "https://github.com/Jesus-DM1308/E-Store#readme",
+  "bugs": {
+    "url": "https://github.com/Jesus-DM1308/E-Store/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jesus-DM1308/E-Store.git"
+  },
+  "license": "ISC",
+  "author": "Jesus Diaz, Antonio Angulo",
+  "type": "module",
+  "main": "main.ts",
+  "scripts": {
+    "dev": "npx tsx watch src/main.ts",
+    "build": "rimraf ./dist && tsc",
+    "start": "npm run build && node dist/app.js"
+  },
+  "dependencies": {
+    "@types/express": "^5.0.6",
+    "dotenv": "^17.4.2",
+    "env-var": "^7.5.0",
+    "express": "^5.2.1"
+  }
+}

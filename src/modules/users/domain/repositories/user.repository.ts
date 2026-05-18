@@ -1,6 +1,5 @@
-import { RegisterUserDto } from '../dtos/users/register-user';
-import { UpdateUserDto } from '../dtos/users/update-user';
-import { UserEntity } from "../entities/user.entity";
+import type { RegisterUserDto, UpdateUserDto } from "../../application/index.ts";
+import type { UserEntity } from "../entities/user.entity.ts";
 
 
 

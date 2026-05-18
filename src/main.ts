@@ -16,5 +16,7 @@ async function main(){
         appRoutes
     );
 
+    console.log(process.env.DATABASE_URL);
+
     server.start();
 }

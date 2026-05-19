@@ -1,4 +1,9 @@
 {
+  "exclude": [
+    "node_modules",
+    "dist",
+    "drizzle.config.ts"
+  ],
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
     // File Layout
@@ -21,7 +26,6 @@
     "declarationMap": true,
 
     // Stricter Typechecking Options
-    "allowImportingTsExtensions": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
 
@@ -34,10 +38,11 @@
     // "noPropertyAccessFromIndexSignature": true,
 
     // Recommended Options
-    "noEmit": true,
+    "noEmit": false,
     "strict": true,
     "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
+    "moduleResolution": "nodenext",
+    "verbatimModuleSyntax": false,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",

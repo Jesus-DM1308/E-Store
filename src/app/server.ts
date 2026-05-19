@@ -1,4 +1,5 @@
 import express, { Router } from 'express';
+import { errorMiddleware } from '../shared/infrastructure/http/middlewares/error.middleware.ts';
 
 export class Server{
     public readonly app = express();
@@ -16,6 +17,7 @@ export class Server{
 
     async start(){
         //Middlewares
+        this.app.use(errorMiddleware);
 
         //Routes
         this.app.use( this.routes );

@@ -1,7 +1,7 @@
-import { integer, pgTable, varchar, numeric, timestamp } from "drizzle-orm/pg-core";
+import { uuid, integer, pgTable, varchar, numeric, timestamp } from "drizzle-orm/pg-core";
 
 export const productsTable = pgTable("products", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  id: uuid().primaryKey(),
   name: varchar({ length: 255 }).notNull(),
   price: numeric().notNull(),
   stock: integer(),

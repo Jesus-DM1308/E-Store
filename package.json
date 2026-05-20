@@ -17,7 +17,9 @@
   "scripts": {
     "dev": "npx tsx watch src/main.ts",
     "build": "rimraf ./dist && tsc",
-    "start": "npm run build && node dist/app.js"
+    "start": "npm run build && node dist/app.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watchAll "
   },
   "dependencies": {
     "@types/express": "^5.0.6",
@@ -28,8 +30,11 @@
     "pg": "^8.21.0"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/pg": "^8.20.0",
     "drizzle-kit": "^0.31.10",
+    "jest": "^30.4.2",
+    "ts-jest": "^29.4.10",
     "tsx": "^4.22.2"
   }
 }

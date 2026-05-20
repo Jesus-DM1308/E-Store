@@ -1,6 +1,6 @@
-import { Server } from './app/server.ts';
-import { envs } from './config/envs.ts';
-import { AppRoutes } from './app/routes/routes.ts';
+import { Server } from './app/server.js';
+import { envs } from './config/envs.js';
+import { AppRoutes } from './app/routes/routes.js';
 
 (async () => {
     main();

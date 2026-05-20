@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { ProductsRoutes } from '../../modules/products/presentation/index.ts';
+import { ProductsRoutes } from '../../modules/products/presentation/index.js';
 
 export class AppRoutes {
 

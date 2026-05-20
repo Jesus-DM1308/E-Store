@@ -1,7 +1,10 @@
 //Archivo cabecera
 
 //DTO's
-export * from './dto/create-product.dto.ts' 
-export * from './dto/update-product.dto.ts' 
+export * from './dto/product.dto.js';
+
+//Services
+export * from './services/product.service.js';
 
 //Use cases
+

@@ -1,3 +1,3 @@
 //Archivo cabecera
 
-export * from './controllers/routes.ts';
+export * from './controllers/routes.js';

@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { ProductsRoutes } from '../../modules/products/presentation/index.ts';
-import { UsersRoutes } from '../../modules/users/presentation/index.ts';
+import { ProductsRoutes } from '../../modules/products/presentation/index.js';
+import { UsersRoutes } from '../../modules/users/presentation/index.js';
 
 export class AppRoutes {
 
@@ -9,7 +9,7 @@ export class AppRoutes {
     const router = Router();
     
     router.use('/products', ProductsRoutes.routes );
-    router.use('/users', UsersRoutes.routes );
+    router.use('/api/users', UsersRoutes.routes );
     
     return router;
   };

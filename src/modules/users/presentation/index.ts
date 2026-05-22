@@ -1,5 +1,6 @@
 
 
 
-
-export * from './controllers/routes.ts';
+// controllers
+export * from './controllers/user.controller.js'
+export * from './controllers/routes.js';

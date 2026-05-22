@@ -4,9 +4,8 @@ import type { UserEntity } from "../entities/user.entity.js";
 
 
 
-export abstract class UserRepository {
-    
-    
+export abstract class UserDatasource {
+
     abstract create( registerUserDto: RegisterUserDto): Promise<UserEntity>;
     abstract getAll(): Promise<UserEntity[]>;
     abstract findById( id: string): Promise<UserEntity>;

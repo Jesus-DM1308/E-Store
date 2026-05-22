@@ -18,15 +18,20 @@ export class UpdateUserDto{
     get values() {
         const returnObj: {[key: string]: any} = {};
 
-        if( this.name ) returnObj.name = this.name;
-        if( this.lastName ) returnObj.lastName = this.lastName;
-        if( this.email ) returnObj.email = this.email;
-        if( this.password ) returnObj.password = this.password;
-        if( this.cel ) returnObj.cel = this.cel;
-        if( this.userType ) returnObj.userType = this.userType;
+        if( this.name ) returnObj['name'] = this.name;
 
-        if( this.updatedAt ) returnObj.updatedAt = this.updatedAt;
-     
+        if( this.lastName ) returnObj['last_name'] = this.lastName;
+
+        if( this.email ) returnObj['email'] = this.email;
+        if( this.password ) returnObj['password'] = this.password;
+
+        if( this.cel ) returnObj['cel'] = this.cel;
+
+        if( this.userType ) returnObj['user_type'] = this.userType;
+
+        //if( this.updatedAt ) returnObj['updated_at'] = this.updatedAt;
+
+        returnObj['updated_at'] = new Date();
 
         return returnObj;
     }
@@ -41,6 +46,23 @@ export class UpdateUserDto{
         if( !id ){
             return ['id must be a valid string'];
         }
+
+        if ( email ) { 
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if ( !emailRegex.test(email) ) {
+                return ['Invalid email format'];
+            }
+        }
+        
+        if( cel.length < 10 ) return ['Phone too short'];
+
+        if ( user_type ) {
+            const usersType = ['CLIENT', 'SELLER'];
+            if ( !usersType.includes(user_type) ) {
+                return ['Invalid user type'];
+            }
+        }
+
 
         if ( updated_at ) {
             newUpdateAt = new Date( updated_at)

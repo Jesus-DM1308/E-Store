@@ -1,5 +1,5 @@
 import type { ProductEntity } from "../entities/product.entity.ts";
-import { CreateProductDto, UpdateProductDto } from '../../application/index.ts';
+import { CreateProductDto, UpdateProductDto } from '../../application/index.js';
 
 export abstract class ProductRepository {
     constructor(){};

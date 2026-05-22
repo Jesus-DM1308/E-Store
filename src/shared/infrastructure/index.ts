@@ -1,6 +1,7 @@
 //Archivo cabecera
 
-//middlewares
+//Database
+//Drizzle
 export * from './database/drizzle/connection.js';
 export * from './database/drizzle/schema.js';
 

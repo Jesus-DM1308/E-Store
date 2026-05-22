@@ -1,14 +1,14 @@
 import { CustomError } from "../../../../shared/domain/index.js";
 import { ProductRepository } from "../../domain/index.js";
-import { ProductDto } from "../index.js";
+import { CreateProductDto } from "../index.js";
 
-export class ProductService{
+export class CreateProductService{
 
     constructor(
         private readonly productRepository: ProductRepository
     ){};
 
-    async execute( data: ProductDto){
+    async execute( data: CreateProductDto){
         const {
             name,
             description,
@@ -29,12 +29,12 @@ export class ProductService{
             CustomError.badRequest('Stock del producto no puede ser menor a 0');
         };
 
-        const exists = await this.productRepository.getNameOfProduct(name);
+        const exists = await this.productRepository.findByName(name);
         if( exists ){
             CustomError.conflict('Nombre del producto ya existe');
         };
 
-        return await this.productRepository.createProduct({
+        return await this.productRepository.create({
             name,
             description,
             price,

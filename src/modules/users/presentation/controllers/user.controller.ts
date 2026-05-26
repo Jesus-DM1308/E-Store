@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import type { UserRepository } from "../../domain/index.js";
-import { DeleteUser, GetUser, GetUsers, RegisterUser, UpdateUser, RegisterUserDto, UpdateUserDto } from "../../application/index.js";
+import { DeleteUser, GetUser, GetUsers, RegisterUser, UpdateUser, RegisterUserDto, UpdateUserDto, LoginUser } from "../../application/index.js";
+import { LoginUserDto } from "../../application/dtos/login-user.dto.js";
 
 
 
@@ -12,6 +13,15 @@ export class UsersController {
 
 
 
+    public loginUser = async ( req: Request, res: Response ) => {
+        
+        const [ error, loginUserDto ] = LoginUserDto.create( req.body );
+        if ( error ) return res.status(400).json({ error });
+
+        const data = await new LoginUser( this.userRepository ).execute( loginUserDto! );
+        return res.json( data );
+    }
+
 
     public getUsers = async(req: Request, res: Response ) => {
 
@@ -20,9 +30,14 @@ export class UsersController {
         
     }
     
-    public getUserById = async(req: Request, res: Response ) => {
+    public getUserById = async(req: any, res: Response ) => {
 
         const id = req.params.id as string;
+
+        const { id: tokenUserId } = req.userTokenData;
+        if ( id !== tokenUserId ) {
+            return res.status(403).json({ error: 'Forbidden: You cannot see other users profiles.' });
+        }
 
         const user = await new GetUser( this.userRepository ).execute( id );
         return res.json( user);
@@ -39,9 +54,15 @@ export class UsersController {
 
     }
 
-    public updateUser = async( req: Request, res: Response ) => {
+    public updateUser = async( req: any, res: Response ) => {
 
         const id = req.params.id as string;
+
+        const { id: tokenUserId } = req.userTokenData;
+        if ( id !== tokenUserId ) {
+            return res.status(403).json({ error: `Forbidden: You cannot modify other people's profiles.` });
+        }
+
         const [error, updateUserDto] = UpdateUserDto.create({ ...req.body, id });
         if( error ) return res.status( 400 ).json({ error });
 
@@ -51,9 +72,14 @@ export class UsersController {
     }
 
 
-    public deleteUser = async( req: Request, res: Response ) => {
+    public deleteUser = async( req: any, res: Response ) => {
 
         const id = req.params.id as string;
+
+        const { id: tokenUserId } = req.userTokenData;
+        if ( id !== tokenUserId ) {
+            return res.status(403).json({ error: 'Forbidden: You cannot delete other accounts.' });
+        }
 
         const user = await new DeleteUser( this.userRepository ).execute( id );
         return res.json( user );

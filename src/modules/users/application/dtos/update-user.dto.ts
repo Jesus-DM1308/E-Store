@@ -53,8 +53,14 @@ export class UpdateUserDto{
                 return ['Invalid email format'];
             }
         }
+
+        if( password ){
+            if( password.length < 8 ) return ['Password too short'];
+        }
         
-        if( cel.length < 10 ) return ['Phone too short'];
+        if( cel ) {
+            if( cel.length < 10 ) return ['Phone too short'];
+        }
 
         if ( user_type ) {
             const usersType = ['CLIENT', 'SELLER'];

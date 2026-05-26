@@ -4,6 +4,7 @@ import { usersTable } from "../../../../shared/infrastructure/database/drizzle/s
 
 import type { RegisterUserDto, UpdateUserDto } from "../../application/index.js";
 import { UserEntity, type UserDatasource } from "../../domain/index.js";
+import { BcryptAdapter } from "../../../../config/bcrypt.adapter.js";
 
 
 
@@ -48,8 +49,15 @@ export class UserDatasourceImpl implements UserDatasource{
         
         await this.findById( updateUserDto.id );
 
+        const dataToUpdate = updateUserDto.values;
+
+       
+        if( dataToUpdate.password ){
+            dataToUpdate.password = BcryptAdapter.hash( dataToUpdate.password );
+        }
+
         const [updatedUser] = await db.update(usersTable)
-            .set( updateUserDto.values )
+            .set( dataToUpdate )
             .where(eq( usersTable.id, updateUserDto.id ))
             .returning();
         
@@ -68,6 +76,19 @@ export class UserDatasourceImpl implements UserDatasource{
         return UserEntity.fromObject( deleted! );
 
     }
+
+    
+    async findByEmail( email: string ): Promise<UserEntity | null> {
+        
+        const [user] = await db.select()
+            .from( usersTable )
+            .where( eq( usersTable.email, email ) );
+
+        if ( !user ) return null;
+
+        return UserEntity.fromObject( user );
+    }
+    
 
 }
 

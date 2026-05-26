@@ -1,5 +1,6 @@
+import { BcryptAdapter } from "../../../../config/bcrypt.adapter.js";
 import type { UserEntity, UserRepository } from "../../domain/index.js";
-import type { RegisterUserDto } from "../index.js";
+import { RegisterUserDto } from "../index.js";
 
 
 
@@ -15,8 +16,19 @@ export class RegisterUser implements RegisterUserUseCases {
     ){}
 
 
+        
     async execute(dto: RegisterUserDto): Promise<UserEntity> {
-        return this.repository.create(dto);
+        
+
+        const hashedPassword = BcryptAdapter.hash( dto.password );
+        
+        
+        const secureData = ({ 
+            ...dto, 
+            password: hashedPassword 
+        }); 
+
+        return this.repository.create( secureData as RegisterUserDto );
     }
 
 

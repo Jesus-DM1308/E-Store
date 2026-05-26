@@ -32,5 +32,9 @@ export class UserRepositoryImpl implements UserRepository {
     deleteById(id: string): Promise<UserEntity> {
         return this.datasource.deleteById( id );
     }
+
+    async findByEmail( email: string ): Promise<UserEntity | null> {
+        return this.datasource.findByEmail( email );
+    }
     
 }

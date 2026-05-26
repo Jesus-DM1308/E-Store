@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { ProductsController } from '../controllers/products.controller.js';
+import { productsController } from '../dependencies/dependencies.js';
 import { catchAsync } from '../../../../shared/infrastructure/index.js';
 
 export class ProductsRoutes {
@@ -8,13 +8,12 @@ export class ProductsRoutes {
   static get routes(): Router {
 
     const router = Router();
-    const controller = new ProductsController();
 
-    router.get('/', catchAsync( controller.getAll() ) );
-    router.get('/:id', catchAsync( controller.getById() ) );
-    router.post('/', catchAsync( controller.create() ) );
-    router.put('/:id', catchAsync( controller.updateById() ) );
-    router.delete('/:id', catchAsync( controller.deleteById() ) );
+    router.get('/', catchAsync( productsController.getAll ) );
+    router.get('/:id', catchAsync( productsController.getById ) );
+    router.post('/', catchAsync( productsController.create ) );
+    router.put('/:id', catchAsync( productsController.updateById ) );
+    router.delete('/:id', catchAsync( productsController.deleteById ) );
 
     return router;
   };

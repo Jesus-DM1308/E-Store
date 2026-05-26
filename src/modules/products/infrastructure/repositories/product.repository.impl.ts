@@ -6,7 +6,7 @@ export class ProductRepositoryImpl implements ProductRepository {
         private readonly ProductDatasource: ProductDatasource
     ){};
 
-    async getById( id: number ): Promise<ProductEntity> {
+    async getById( id: number ): Promise<ProductEntity | null> {
         return this.ProductDatasource.getById( id );
     };
 
@@ -14,19 +14,19 @@ export class ProductRepositoryImpl implements ProductRepository {
         return this.ProductDatasource.getAll();
     };
 
-    async create( createProductDto: CreateProductDto ): Promise<ProductEntity> {
+    async create( createProductDto: CreateProductDto ): Promise<ProductEntity | null> {
        return this.ProductDatasource.create( createProductDto );
     };
 
-    async updateById( id: number, updateProductDto: UpdateProductDto ): Promise<ProductEntity> {
+    async updateById( id: number, updateProductDto: UpdateProductDto ): Promise<ProductEntity | null> {
         return this.ProductDatasource.updateById( id, updateProductDto );
     };
 
-    async deleteById( id: number ): Promise<ProductEntity> {
+    async deleteById( id: number ): Promise<ProductEntity | null> {
         return this.ProductDatasource.deleteById( id );
     };
 
-    async findByName( name: string): Promise<ProductEntity> {
+    async findByName( name: string): Promise<ProductEntity | null> {
         return this.ProductDatasource.findByName( name );
     }
 

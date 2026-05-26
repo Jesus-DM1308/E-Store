@@ -8,37 +8,41 @@ export class UpdateProductService{
         private readonly productRepository: ProductRepository
     ){};
 
-    async execute(id: number, data: UpdateProductDto){
+    async execute(id: number, body: { [key: string]: any } ){
+
+        //Verificar existencia del producto en la base de datos
+        const idExist = await this.productRepository.getById(id);
+        if( !idExist ){
+            throw CustomError.badRequest('Producto no existe.')
+        };
+
+        const data = UpdateProductDto.create(body);
         const {
             name,
             description,
             price,
             stock,
             img
-        } = data;
+        } = data.props;
         
-        const idExist = await this.productRepository.getById(id);
-        if( !idExist ){
-            throw CustomError.badRequest('Producto no existe.')
-        };
+        //Reglas de negocio
 
-        if(name !== undefined) {
-            const nameExists = await this.productRepository.findByName(name);
-            if( nameExists && idExist.id !== id){
-                throw CustomError.conflict('Nombre del producto ya existe.');
-            };
-        };
-        
-        if(name !== undefined && !name.trim()){
-            throw CustomError.badRequest('Nombre del producto es requerido.');
-        };
-
-        if(price !== undefined && price <= 0){
+        if(price <= 0){
             throw CustomError.badRequest('Precio del producto debe ser mayor a 0.');
         };
 
-        if(stock !== undefined && stock < 0){
+        if(stock < 0){
             throw CustomError.badRequest('Stock del producto no puede ser menor a 0.');
+        };
+
+        if(description.length > 100){
+            throw CustomError.badRequest('Descripcion del producto no puede ser mayor a 100 caracteres');
+        };
+
+        //Evitar duplicado de nombre validando que no se compare asi mismo
+        const nameExists = await this.productRepository.findByName(name);
+        if( nameExists && idExist.id !== id){
+            throw CustomError.conflict('Nombre del producto ya existe.');
         };
 
         return await this.productRepository.updateById(id, data);

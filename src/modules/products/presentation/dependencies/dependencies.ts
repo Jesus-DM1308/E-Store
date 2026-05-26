@@ -13,9 +13,9 @@ import {
   GetProductService
 } from "../../application/index.js";
 
-import { ProductsController } from '../index.js';
-import { ProductRepository } from "../../domain/index.js";
-
+import {
+  ProductsController
+} from "../index.js"
 
 
 // datasource
@@ -23,39 +23,33 @@ const datasource =
   new DrizzleProductDataSource();
 
 // repository
-const repositoryImpl =
-  new ProductRepositoryImpl(
-    datasource
-  );
-
 const repository =
-  new ProductRepository(
+  new ProductRepositoryImpl(
     datasource
   );
 
 // services
 const createProductService =
   new CreateProductService(
-    repositoryImpl
+    repository
   );
 
 const updateProductService =
   new UpdateProductService(
-    repositoryImpl
+    repository
   );
 
 const deleteProductService =
   new DeleteProductService(
-    repositoryImpl
+    repository
   );
 
 const getProductService =
   new GetProductService(
-    repositoryImpl
+    repository
   );
 
-
-
+// controller
 export const productsController =
   new ProductsController(
     createProductService,

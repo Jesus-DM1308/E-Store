@@ -16,11 +16,15 @@ export class Server{
     };
 
     async start(){
+
+        this.app.use(express.json());
+        this.app.use( express.urlencoded({ extended: true }) ); // x-www-form-urlencoded
+
         //Routes
         this.app.use( this.routes );
-        
+
         //Middlewares
-        this.app.use(errorMiddleware);
+       this.app.use(errorMiddleware);
 
         this.serverListener = this.app.listen(this.port, () => {
             console.log(`Server running on port ${ this.port }`);

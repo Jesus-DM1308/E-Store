@@ -1,4 +1,4 @@
-import { CreateProductService, UpdateProductService, DeleteProductService, GetProductService } from '../../application/index.js';
+import { CreateProductService, UpdateProductService, DeleteProductService, GetProductService, CreateProductDto } from '../../application/index.js';
 import { Request, Response } from 'express';
 import { ProductRepository } from '../../domain/index.js';
 import { CustomError } from '../../../../shared/domain/index.js';
@@ -22,12 +22,14 @@ export class ProductsController{
         if( isNaN(id) ){
             throw CustomError.badRequest('Id del producto no valida')
         };
-        const product = await this.getProductService.execute(id);
+        const product = await this.getProductService.execute( id );
         res.status(200).json(product);
     };
 
     create = async ( req: Request, res: Response ) => {
-        const product = await this.createproductService.execute(req.body);
+        const dto = CreateProductDto.create( req.body );
+
+        const product = await this.createproductService.execute( dto );
         res.status(201).json({
             message: 'El producto ha sido creado exitosamente:',
             product: product
@@ -35,8 +37,8 @@ export class ProductsController{
     };
 
     updateById = async ( req: Request, res: Response ) => {
-        const id  = Number(req.params.id);
-        if( isNaN(id) ){
+        const id  = Number( req.params.id );
+        if( isNaN( id ) ){
             throw CustomError.badRequest('Id del producto no valida')
         };
         const product = await this.updateProductService.execute( id, req.body );
@@ -47,12 +49,12 @@ export class ProductsController{
     };
 
     deleteById = async ( req: Request, res: Response ) => {
-        const id  = Number(req.params.id);
-        if( isNaN(id) ){
+        const id  = Number( req.params.id );
+        if( isNaN( id ) ){
             throw CustomError.badRequest('Id del producto no valida')
         };
         const product = await this.deleteProductService.execute( id );
-        res.status(200).json({
+        res.status( 200 ).json({
             message: 'El producto ha sido eliminado exitosamente:',
             product: product
         });

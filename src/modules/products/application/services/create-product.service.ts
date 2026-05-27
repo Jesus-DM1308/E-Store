@@ -27,8 +27,8 @@ export class CreateProductService{
             throw CustomError.badRequest('Stock del producto no puede ser menor a 0');
         };
 
-        if(description.length > 100){
-            throw CustomError.badRequest('Descripcion del producto no puede ser mayor a 100 caracteres');
+        if(description.length > 255){
+            throw CustomError.badRequest('Descripcion del producto no puede ser mayor a 255 caracteres');
         };
 
         const exists = await this.productRepository.findByName(name);

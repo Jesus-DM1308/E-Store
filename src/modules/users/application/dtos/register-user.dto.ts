@@ -21,26 +21,26 @@ export class RegisterUserDto {
 
         const nameRegex = /^[A-ZÁÉÍÓÚÑa-zñáéíóúü][ ]?[A-ZÁÉÍÓÚÑa-zñáéíóúü]+(?:[ ]?[A-ZÁÉÍÓÚÑa-zñáéíóúü]+)*$/;
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        const passRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
+        const passRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-.]).{8,}$/;
  
 
         const usersType = ['CLIENT', 'SELLER'];
         const number = 10;
 
 
-        name = name.trim();
         if( !name ) {
             throw CustomError.badRequest('Name property is required');
         }
+        name = name.trim();
         if( !nameRegex.test( name ) ){
             throw CustomError.badRequest('Invalid name format');
         }
 
 
-        last_name = last_name.trim();
         if( !last_name ) {
             throw CustomError.badRequest('Last Name property is required');
         }
+        last_name = last_name.trim();
         if( !nameRegex.test( last_name )){
             throw CustomError.badRequest('Invalid last name format');
         }
@@ -75,11 +75,11 @@ export class RegisterUserDto {
         }
         
 
-        user_type = user_type.trim().toUpperCase();
         if( !user_type ) {
             throw CustomError.badRequest('User type property is required');
         }
         
+        user_type = user_type.trim().toUpperCase();
         if( !usersType.includes(user_type )) {
             throw CustomError.badRequest('Invalid user type');
         }

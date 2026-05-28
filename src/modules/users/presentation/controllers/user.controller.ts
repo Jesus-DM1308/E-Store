@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import type { UserRepository } from "../../domain/index.js";
 import { DeleteUser, GetUser, GetUsers, RegisterUser, UpdateUser, RegisterUserDto, UpdateUserDto, LoginUser } from "../../application/index.js";
 import { LoginUserDto } from "../../application/dtos/login-user.dto.js";
+import { CustomError } from "../../../../shared/domain/errors/custom-error.js";
 
 
 
@@ -34,9 +35,11 @@ export class UsersController {
 
         const id = req.params.id as string;
 
+        //console.log(req.userTokenData);
         const { id: tokenUserId } = req.userTokenData;
         if ( id !== tokenUserId ) {
-            return res.status(403).json({ error: 'Forbidden: You cannot see other users profiles.' });
+            throw CustomError.forbidden('You cannot see other users profiles.')
+            //return res.status(403).json({ error: 'Forbidden: You cannot see other users profiles.' });
         }
 
         const user = await new GetUser( this.userRepository ).execute( id );
@@ -58,9 +61,10 @@ export class UsersController {
 
         const id = req.params.id as string;
 
-        const { id: tokenUserId } = req.userTokenData;
+        const { id: tokenUserId } = req.userTokenData; 
         if ( id !== tokenUserId ) {
-            return res.status(403).json({ error: `Forbidden: You cannot modify other people's profiles.` });
+            throw CustomError.forbidden(`You cannot modify other people's profiles.`);
+            //return res.status(403).json({ error: `Forbidden: You cannot modify other people's profiles.` });
         }
 
         const [error, updateUserDto] = UpdateUserDto.create({ ...req.body, id });
@@ -78,7 +82,8 @@ export class UsersController {
 
         const { id: tokenUserId } = req.userTokenData;
         if ( id !== tokenUserId ) {
-            return res.status(403).json({ error: 'Forbidden: You cannot delete other accounts.' });
+            throw CustomError.forbidden('You cannot delete other accounts.')
+            //return res.status(403).json({ error: 'Forbidden: You cannot delete other accounts.' });
         }
 
         const user = await new DeleteUser( this.userRepository ).execute( id );

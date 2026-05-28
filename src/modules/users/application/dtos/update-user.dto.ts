@@ -39,8 +39,8 @@ export class UpdateUserDto{
 
     static create(  props: {[key:string]: any}): [string?, UpdateUserDto?] {
         
-        let {name, last_name, password, cel } = props;
-        const { id, email,user_type } = props;
+        let {name, last_name, password, cel, user_type } = props;
+        const { id, email } = props;
         //let newUpdateAt = updated_at;
 
         const nameRegex = /^[A-ZÁÉÍÓÚÑa-zñáéíóúü][ ]?[A-ZÁÉÍÓÚÑa-zñáéíóúü]+(?:[ ]?[A-ZÁÉÍÓÚÑa-zñáéíóúü]+)*$/;
@@ -53,12 +53,12 @@ export class UpdateUserDto{
         if( name ){
             
             if( typeof name !== 'string' ){
-                return ['Name must be a valid text string']
+                throw CustomError.badRequest('Name must be a valid text string');
             }
 
             name = name.trim();
             if( !nameRegex.test( name )){
-                return ['Invalid name format'];
+                throw CustomError.badRequest('Invalid name format');
             }
 
         }
@@ -66,12 +66,12 @@ export class UpdateUserDto{
         if( last_name ){
 
             if( typeof last_name !== 'string' ){
-                return ['Last name must be a valid text string'];
+                throw CustomError.badRequest('Last name must be a valid text string');
             }
 
             last_name = last_name.trim();
             if( !nameRegex.test( last_name )){
-                return ['Invalid last name format'];
+                throw CustomError.badRequest('Invalid last name format');
             }
 
         }
@@ -80,7 +80,7 @@ export class UpdateUserDto{
         if ( email ) { 
             const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
             if ( !emailRegex.test(email) ) {
-                return ['Invalid email format'];
+                throw CustomError.badRequest('Invalid email format');
             }
         }
 
@@ -93,12 +93,12 @@ export class UpdateUserDto{
             const passRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
             //validar si es string
             if( typeof password !== 'string'){
-                return ['Password must be a valid text string']
+                throw CustomError.badRequest('Password must be a valid text string');
             }
 
             password = password.trim();
             if( !passRegex.test( password )){
-                return ['Invalid password format'];
+                throw CustomError.badRequest('Invalid password format');
             }
 
         }
@@ -107,21 +107,21 @@ export class UpdateUserDto{
         
         if( cel ){
             const number = 10;
-            cel = cel.trim();
+            cel = String(cel).trim();
 
             // validar que sea una cadena
             if( typeof cel !== 'string' ){
-                return ['Phone must be a valid text string'];
+                throw CustomError.badRequest('Phone must be a valid text string');
             }
 
             //comprobar si no lleva algun otro caracter aparte de numeros
             if( isNaN(Number( cel ))){
-                return ['Phone must contain only numbers'];
+                throw CustomError.badRequest('Phone must contain only numbers');
             }
 
             //validar la cantidad de caracteres quitando los espacios
             if(  cel.length !== number ){
-                return ['Phone must be 10 digits'];
+                throw CustomError.badRequest('Phone must be 10 digits');
             }
 
         }
@@ -130,8 +130,10 @@ export class UpdateUserDto{
 
         if ( user_type ) {
             const usersType = ['CLIENT', 'SELLER'];
+            user_type = user_type.trim().toUpperCase();
+            
             if ( !usersType.includes(user_type) ) {
-                return ['Invalid user type'];
+                throw CustomError.badRequest('Invalid user type');
             }
         }
 

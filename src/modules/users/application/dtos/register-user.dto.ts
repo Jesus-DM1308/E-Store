@@ -1,3 +1,4 @@
+import { CustomError } from "../../../../shared/domain/errors/custom-error.js";
 
 
 
@@ -15,28 +16,74 @@ export class RegisterUserDto {
 
     static create( props: {[key:string]: any}): [string?, RegisterUserDto?]{
 
-        const { name, last_name, email, password, cel,user_type } = props;
+        let {name, last_name, password, cel, email, user_type } = props;
+       
+
+        const nameRegex = /^[A-ZÁÉÍÓÚÑa-zñáéíóúü][ ]?[A-ZÁÉÍÓÚÑa-zñáéíóúü]+(?:[ ]?[A-ZÁÉÍÓÚÑa-zñáéíóúü]+)*$/;
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        const passRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
+ 
+
         const usersType = ['CLIENT', 'SELLER'];
+        const number = 10;
 
 
-        if( !name ) return ['Name property is required'];
-        if( !last_name ) return ['Last Name property is required'];
+        name = name.trim();
+        if( !name ) {
+            throw CustomError.badRequest('Name property is required');
+        }
+        if( !nameRegex.test( name ) ){
+            throw CustomError.badRequest('Invalid name format');
+        }
 
-        if( !email ) return ['Email property is required'];
-        if ( !emailRegex.test(email) ) return ['Invalid email format'];
 
-        if( !password ) return ['Password property is required'];
-        if( password.length < 8 ) return ['Password too short'];
+        last_name = last_name.trim();
+        if( !last_name ) {
+            throw CustomError.badRequest('Last Name property is required');
+        }
+        if( !nameRegex.test( last_name )){
+            throw CustomError.badRequest('Invalid last name format');
+        }
+
+        email = email.trim();
+        if( !email ) {
+            throw CustomError.badRequest('Email property is required');
+        }
+        if ( !emailRegex.test(email) ) {
+            throw CustomError.badRequest('Invalid email format');
+        }
         
-        if( !cel  ) return ['Cel property is required'];
-        if( cel.length < 10 ) return ['Phone too short'];
+
+        password = password.trim();
+        if( !password ) {
+            throw CustomError.badRequest('Password property is required');
+        }
+        if( !passRegex.test( password )){
+            throw CustomError.badRequest('Invalid password format');
+        }
+
+        
+        cel = String(cel).trim();
+        if( !cel  ) {
+            throw CustomError.badRequest('Cel property is required');
+        }
+        if( isNaN(Number( cel ))){
+            throw CustomError.badRequest('Phone must contain only numbers');
+        }
+        if( cel.length !== number ) {
+            throw CustomError.badRequest('Phone must be 10 digits');
+        }
         
 
-        if( !user_type ) return ['User type property is required'];
-        if( !usersType.includes(user_type )) return ['Invalid user type'];
-
-
+        user_type = user_type.trim().toUpperCase();
+        if( !user_type ) {
+            throw CustomError.badRequest('User type property is required');
+        }
+        
+        if( !usersType.includes(user_type )) {
+            throw CustomError.badRequest('Invalid user type');
+        }
+        
 
         return ['', new RegisterUserDto( name, last_name, email, password, cel, user_type )];
 

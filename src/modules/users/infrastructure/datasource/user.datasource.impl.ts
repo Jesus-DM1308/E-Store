@@ -5,6 +5,7 @@ import { usersTable } from "../../../../shared/infrastructure/database/drizzle/s
 import type { RegisterUserDto, UpdateUserDto } from "../../application/index.js";
 import { UserEntity, type UserDatasource } from "../../domain/index.js";
 import { BcryptAdapter } from "../../../../config/bcrypt.adapter.js";
+import { CustomError } from "../../../../shared/domain/errors/custom-error.js";
 
 
 
@@ -13,6 +14,10 @@ export class UserDatasourceImpl implements UserDatasource{
 
     async create(registerUserDto: RegisterUserDto): Promise<UserEntity> {
 
+        const existUser = await this.findByEmail(registerUserDto.email);
+        if(existUser){
+            throw CustomError.conflict(`Email ${registerUserDto.email} is already registered`)
+        }
 
         const [user] = await db.insert(usersTable).values({
                 name: registerUserDto.name,
@@ -40,7 +45,7 @@ export class UserDatasourceImpl implements UserDatasource{
             .from(usersTable)
             .where(eq(usersTable.id, id));
     
-        if(!user) throw new Error(`User with id ${ id } not found`);
+        if(!user) throw CustomError.badRequest(`User with id ${ id } not found`);
         return UserEntity.fromObject(user);
     }
 

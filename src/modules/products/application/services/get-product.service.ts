@@ -9,11 +9,11 @@ export class GetProductService{
 
     async execute(id: number){
 
-        const idExist = await this.productRepository.getById( id );
-        if( !idExist ){
-            throw CustomError.badRequest('El Producto ingresado no existe.')
+        const product = await this.productRepository.getById( id );
+        if( !product ){
+            throw CustomError.notFound('La id del producto ingresado no existe.')
         };
 
-        return await this.productRepository.getById( id );
+        return product;
     };
 };

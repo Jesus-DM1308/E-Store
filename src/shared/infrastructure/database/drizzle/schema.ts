@@ -15,9 +15,9 @@ export const usersTable = pgTable("users", {
 export const productsTable = pgTable("products", {
   id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
   name: varchar({ length: 255 }).notNull(),
-  description: varchar({ length: 255 }).notNull(),
-  price: integer().notNull(),
-  stock: integer(),
+  description: varchar({ length: 255 }),
+  price: numeric({ mode: 'number' }).notNull(),
+  stock: integer().notNull(),
   img: varchar({ length: 255 }),
   created_at: timestamp().defaultNow().notNull(),
   updated_at: timestamp().defaultNow().notNull(),

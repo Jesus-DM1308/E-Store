@@ -27,25 +27,33 @@ export class UpdateProductDto{
         if(name !== undefined && !name?.trim()){
             throw CustomError.badRequest('Nombre del producto es requerido');
         };
-        
-        if(price === undefined){
-            throw CustomError.badRequest('Precio del producto es requerido');
-        };
-        if(stock === undefined){
-            throw CustomError.badRequest('Stock del producto es requerido');
-        };
 
-        //Parsings
-        const parsedPrice = Number(price);
+        let parsedPrice;
+        if(price !== undefined){
+            parsedPrice = Number(price);
+            if(isNaN(Number(price))){
+                throw CustomError.badRequest('Precio del producto debe ser un numero');
+            };
 
-        if(isNaN(parsedPrice)){
-            throw CustomError.badRequest('Precio del producto debe ser un numero');
+            if(parsedPrice <= 0){
+                throw CustomError.badRequest('Precio del producto debe ser mayor a 0.');
+            };
         };
 
-        const parsedStock = Number(stock);
+        let parsedStock;
+        if(stock !== undefined){
+            parsedStock = Number(stock);
+            if(isNaN(parsedStock)){
+                throw CustomError.badRequest('Stock del producto debe ser un numero');
+            };
 
-        if(isNaN(parsedStock)){
-            throw CustomError.badRequest('Stock del producto debe ser un numero');
+            if(parsedStock < 0){
+                throw CustomError.badRequest('Stock del producto no puede ser menor a 0.');
+            };
+        };
+
+        if(description !== undefined && description.length > 255){
+            throw CustomError.badRequest('Descripcion del producto no puede ser mayor a 255 caracteres');
         };
 
         return new UpdateProductDto({
@@ -56,4 +64,4 @@ export class UpdateProductDto{
             img
         });
     };
-};
+};        

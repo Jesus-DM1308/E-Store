@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { db, productsTable } from "../../../../shared/infrastructure/index.js";
 import { ProductEntity, ProductDatasource } from "../../domain/index.js";
 import { CreateProductDto, UpdateProductDto } from "../../application/index.js";
+import { ProductMapper } from "../mappers/product.mapper.js";
 
 export class DrizzleProductDataSource extends ProductDatasource {
 
@@ -12,13 +13,13 @@ export class DrizzleProductDataSource extends ProductDatasource {
         if (!product) {
             return null;
         };
-        return ProductEntity.fromObject(product);
+        return ProductMapper.toEntity(product);
     };
 
     async getAll( ): Promise<ProductEntity[]> {
         const allProducts = await db.select()
                                     .from( productsTable );
-        return allProducts.map( product => ProductEntity.fromObject(product));
+        return allProducts.map( product => ProductMapper.toEntity(product));
     };
 
     async create( createProductDto: CreateProductDto ): Promise<ProductEntity | null> {
@@ -29,7 +30,7 @@ export class DrizzleProductDataSource extends ProductDatasource {
         if (!product) {
             return null;
         }
-        return ProductEntity.fromObject( product );
+        return ProductMapper.toEntity( product );
     };
 
     async updateById( id: number, updateProductDto: UpdateProductDto ): Promise<ProductEntity | null> {
@@ -43,7 +44,7 @@ export class DrizzleProductDataSource extends ProductDatasource {
         if (!product) {
             return null;
         };
-        return ProductEntity.fromObject( product );
+        return ProductMapper.toEntity( product );
     };
 
     async deleteById( id: number ): Promise<ProductEntity | null> {
@@ -53,7 +54,7 @@ export class DrizzleProductDataSource extends ProductDatasource {
         if (!product) {
             return null;
         };
-        return ProductEntity.fromObject( product );
+        return ProductMapper.toEntity( product );
     };
 
     async findByName( name: string ): Promise<ProductEntity | null>{
@@ -63,7 +64,7 @@ export class DrizzleProductDataSource extends ProductDatasource {
         if (!product) {
             return null;
         }
-        return ProductEntity.fromObject( product );
+        return ProductMapper.toEntity( product );
 
     };
 

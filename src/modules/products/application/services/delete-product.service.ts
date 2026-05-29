@@ -11,7 +11,7 @@ export class DeleteProductService{
 
         const idExist = await this.productRepository.getById( id );
         if( !idExist ){
-            throw CustomError.badRequest('El Producto ingresado no existe.')
+            throw CustomError.notFound('La id del producto ingresado no existe.')
         };
 
         return await this.productRepository.deleteById( id );

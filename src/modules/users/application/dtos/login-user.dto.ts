@@ -12,8 +12,10 @@ export class LoginUserDto {
 
     static create( props: {[key:string]: any}): [string?, LoginUserDto?]{
         
-        const { email, password } = props;
+        let { password } = props;
+        const { email } = props;
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        const passRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-.]).{8,}$/;
 
         if( !email ) {
             throw CustomError.badRequest('Email property is required');
@@ -23,14 +25,14 @@ export class LoginUserDto {
             throw CustomError.badRequest('Invalid email format');
         }
 
+   
         if( !password ) {
             throw CustomError.badRequest('Password property is required');
         }
-
-        if( password.length < 8 ) {
-            throw CustomError.badRequest('Password too short');
+        password = password.trim();
+        if( !passRegex.test( password )){
+            throw CustomError.badRequest('Invalid password format');
         }
-
 
         return [ '', new LoginUserDto(email, password)];
     }

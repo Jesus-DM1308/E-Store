@@ -38,8 +38,7 @@ export class UsersController {
         //console.log(req.userTokenData);
         const { id: tokenUserId } = req.userTokenData;
         if ( id !== tokenUserId ) {
-            throw CustomError.forbidden('You cannot see other users profiles.')
-            //return res.status(403).json({ error: 'Forbidden: You cannot see other users profiles.' });
+            throw CustomError.forbidden('You cannot see other users profiles.');
         }
 
         const user = await new GetUser( this.userRepository ).execute( id );
@@ -64,7 +63,6 @@ export class UsersController {
         const { id: tokenUserId } = req.userTokenData; 
         if ( id !== tokenUserId ) {
             throw CustomError.forbidden(`You cannot modify other people's profiles.`);
-            //return res.status(403).json({ error: `Forbidden: You cannot modify other people's profiles.` });
         }
 
         const [error, updateUserDto] = UpdateUserDto.create({ ...req.body, id });
@@ -83,7 +81,6 @@ export class UsersController {
         const { id: tokenUserId } = req.userTokenData;
         if ( id !== tokenUserId ) {
             throw CustomError.forbidden('You cannot delete other accounts.')
-            //return res.status(403).json({ error: 'Forbidden: You cannot delete other accounts.' });
         }
 
         const user = await new DeleteUser( this.userRepository ).execute( id );

@@ -1,3 +1,4 @@
+import { CustomError } from "../../../../shared/domain/errors/custom-error.js";
 import type { UserEntity, UserRepository } from "../../domain/index.js";
 
 
@@ -15,6 +16,8 @@ export class GetUser implements GetUserUseCases {
     ){}
 
     async execute(id: string): Promise<UserEntity> {
+
+
         return this.repository.findById( id );
     }
 

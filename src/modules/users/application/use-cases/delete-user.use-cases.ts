@@ -1,3 +1,4 @@
+import { CustomError } from "../../../../shared/domain/errors/custom-error.js";
 import type { UserEntity, UserRepository } from "../../domain/index.js";
 
 
@@ -16,6 +17,8 @@ export class DeleteUser implements DeleteUserUseCases {
     ){}
 
     async execute(id: string): Promise<UserEntity> {
+
+      
         return this.repository.deleteById( id );
     }
 

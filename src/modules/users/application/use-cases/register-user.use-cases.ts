@@ -1,4 +1,5 @@
 import { BcryptAdapter } from "../../../../config/bcrypt.adapter.js";
+import { CustomError } from "../../../../shared/domain/errors/custom-error.js";
 import type { UserEntity, UserRepository } from "../../domain/index.js";
 import { RegisterUserDto } from "../index.js";
 
@@ -27,6 +28,14 @@ export class RegisterUser implements RegisterUserUseCases {
             ...dto, 
             password: hashedPassword 
         }); 
+
+
+
+        const existUser = await this.repository.findByEmail( dto.email );
+                if(existUser){
+                    throw CustomError.conflict(`Email is already registered`)
+                }
+        
 
         return this.repository.create( secureData as RegisterUserDto );
     }

@@ -14,10 +14,10 @@ export class UserDatasourceImpl implements UserDatasource{
 
     async create(registerUserDto: RegisterUserDto): Promise<UserEntity> {
 
-        const existUser = await this.findByEmail(registerUserDto.email);
-        if(existUser){
-            throw CustomError.conflict(`Email ${registerUserDto.email} is already registered`)
-        }
+        // const existUser = await this.findByEmail(registerUserDto.email);
+        // if(existUser){
+        //     throw CustomError.conflict(`Email ${registerUserDto.email} is already registered`)
+        // }
 
         const [user] = await db.insert(usersTable).values({
                 name: registerUserDto.name,

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { ProductsRoutes } from '../../modules/products/presentation/index.js';
+import { UsersRoutes } from '../../modules/users/presentation/index.js';
 
 export class AppRoutes {
 
@@ -8,7 +9,8 @@ export class AppRoutes {
     const router = Router();
     
     router.use('/products', ProductsRoutes.routes );
-
+    router.use('/api/users', UsersRoutes.routes );
+    
     return router;
   };
 };

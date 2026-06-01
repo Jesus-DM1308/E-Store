@@ -1,0 +1,1 @@
+ALTER TABLE "products" ADD COLUMN "description" varchar(500) NOT NULL;

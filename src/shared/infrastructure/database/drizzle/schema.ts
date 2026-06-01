@@ -1,16 +1,5 @@
 import { integer, pgTable, varchar, numeric, timestamp, uuid } from "drizzle-orm/pg-core";
 
-export const productsTable = pgTable("products", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  name: varchar({ length: 255 }).notNull(),
-  price: numeric().notNull(),
-  stock: integer(),
-  img: varchar({ length: 255 }),
-  updated_at: timestamp(),
-  created_at: timestamp().defaultNow()
-});
-
-
 export const usersTable = pgTable("users", {
   id: uuid('id').defaultRandom().primaryKey(),
   name: varchar({ length: 255 }).notNull(),
@@ -21,4 +10,15 @@ export const usersTable = pgTable("users", {
   user_type: varchar({ length: 255 }).notNull(),
   updated_at: timestamp(),
   created_at: timestamp().defaultNow()
+});
+
+export const productsTable = pgTable("products", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+  name: varchar({ length: 255 }).notNull(),
+  description: varchar({ length: 255 }),
+  price: numeric({ mode: 'number' }).notNull(),
+  stock: integer().notNull(),
+  img: varchar({ length: 255 }),
+  created_at: timestamp().defaultNow().notNull(),
+  updated_at: timestamp().defaultNow().notNull(),
 });

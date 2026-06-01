@@ -23,37 +23,52 @@ export class UpdateProductDto{
             img
         } = object;
 
-        //Existence de los atributos requeridos
-        if(name !== undefined && !name?.trim()){
-            throw CustomError.badRequest('Nombre del producto es requerido');
-        };
-        
-        if(price === undefined){
-            throw CustomError.badRequest('Precio del producto es requerido');
-        };
-        if(stock === undefined){
-            throw CustomError.badRequest('Stock del producto es requerido');
+        const updatedProduct: UpdateProductProps = {};
+
+        if(name !== undefined){
+            updatedProduct.name = name;
         };
 
-        //Parsings
-        const parsedPrice = Number(price);
-
-        if(isNaN(parsedPrice)){
-            throw CustomError.badRequest('Precio del producto debe ser un numero');
+        if(description !== undefined){
+            updatedProduct.description = description;
         };
 
-        const parsedStock = Number(stock);
-
-        if(isNaN(parsedStock)){
-            throw CustomError.badRequest('Stock del producto debe ser un numero');
+        if(img !== undefined){
+            updatedProduct.img = img;
         };
 
-        return new UpdateProductDto({
-            name,
-            description,
-            price: parsedPrice,
-            stock: parsedStock,
-            img
-        });
+        if(price !== undefined){
+            const parsedPrice = Number(price);
+
+            if(isNaN(parsedPrice)){
+                throw CustomError.badRequest('Precio del producto debe ser un numero');
+            };
+
+            if(parsedPrice <= 0){
+                throw CustomError.badRequest('Precio del producto debe ser mayor a 0.');
+            };
+
+            updatedProduct.price = parsedPrice;
+        };
+
+        if(stock !== undefined){
+            const parsedStock = Number(stock);
+
+            if(isNaN(parsedStock)){
+                throw CustomError.badRequest('Stock del producto debe ser un numero');
+            };
+
+            if(parsedStock < 0){
+                throw CustomError.badRequest('Stock del producto no puede ser menor a 0.');
+            };
+
+            updatedProduct.stock = parsedStock;
+        };
+
+        if(description !== undefined && description.length > 255){
+            throw CustomError.badRequest('Descripcion del producto no puede ser mayor a 255 caracteres');
+        };
+
+        return new UpdateProductDto(updatedProduct);
     };
-};
+};  

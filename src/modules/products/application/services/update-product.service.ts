@@ -24,10 +24,11 @@ export class UpdateProductService{
             stock,
             img
         } = data.props;
-        
+
         if( name !== undefined ){
+            const nameExists = await this.productRepository.findByName(name);
             //Evitar duplicado de nombre validando que no se compare asi mismo
-            if( product.name === name && product.id !== id){
+            if( nameExists?.name === name && nameExists.id !== id){
                 throw CustomError.conflict('Nombre del producto ya existe.');
             };
         };

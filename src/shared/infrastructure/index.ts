@@ -2,8 +2,8 @@
 
 //Database
 //Drizzle
-export * from './database/drizzle/connection.js';
-export * from './database/drizzle/schema.js';
+export * from './database/drizzle-orm/connection.js';
+export * from './database/drizzle-orm/schema.js';
 
 
 //http

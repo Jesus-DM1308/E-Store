@@ -10,14 +10,16 @@ export class UserEntity {
         public readonly email: string,
         public readonly password: string,
         public readonly cel: string,
+        public readonly isActive: boolean,
         public readonly userType: string,
+        public readonly deleteAt?: Date | null,
         public readonly createdAt?: Date | null,
         public readonly updatedAt?: Date | null,
     ) {}
 
 
     public static fromObject( object: {[key: string]: any}): UserEntity {
-        const {id, name, last_name, email, password, cel,user_type, created_at, updated_at} = object;
+        const {id, name, last_name, email, password, cel, is_active,user_type, delete_at, created_at, updated_at} = object;
         if( !id ) throw Error('Id is required');
         if( !name ) throw Error('Name is required');
         if( !last_name ) throw Error('Last name is required');
@@ -28,7 +30,7 @@ export class UserEntity {
    
 
         return new UserEntity(
-            id, name, last_name, email, password, cel, user_type, created_at, updated_at );
+            id, name, last_name, email, password, cel, is_active, user_type, delete_at, created_at, updated_at );
    }
 
 

@@ -1,11 +1,12 @@
-import { eq } from "drizzle-orm";
-import { db } from "../../../../shared/infrastructure/database/drizzle/connection.js";
-import { usersTable } from "../../../../shared/infrastructure/database/drizzle/schema.js";
+import { eq, and } from "drizzle-orm";
+import { db } from "../../../../shared/infrastructure/database/drizzle-orm/connection.js";
+import { usersTable } from "../../../../shared/infrastructure/database/drizzle-orm/schema.js";
 
 import type { RegisterUserDto, UpdateUserDto } from "../../application/index.js";
 import { UserEntity, type UserDatasource } from "../../domain/index.js";
 import { BcryptAdapter } from "../../../../config/bcrypt.adapter.js";
 import { CustomError } from "../../../../shared/domain/errors/custom-error.js";
+import e from "express";
 
 
 
@@ -43,9 +44,12 @@ export class UserDatasourceImpl implements UserDatasource{
 
         const [user] = await db.select()
             .from(usersTable)
-            .where(eq(usersTable.id, id));
+            .where(and(
+                eq(usersTable.id, id),
+                eq(usersTable.is_active, true)
+            ));
     
-        if(!user) throw CustomError.badRequest(`User with id ${ id } not found`);
+        if(!user) throw CustomError.notFound(`User with id ${ id } not found`);
         return UserEntity.fromObject(user);
     }
 
@@ -63,7 +67,10 @@ export class UserDatasourceImpl implements UserDatasource{
 
         const [updatedUser] = await db.update(usersTable)
             .set( dataToUpdate )
-            .where(eq( usersTable.id, updateUserDto.id ))
+            .where(and(
+                eq( usersTable.id, updateUserDto.id ),
+                eq(usersTable.is_active, true)
+            ))
             .returning();
         
         return UserEntity.fromObject( updatedUser! );
@@ -74,9 +81,13 @@ export class UserDatasourceImpl implements UserDatasource{
     async deleteById(id: string): Promise<UserEntity> {
         await this.findById( id );
 
-        const [deleted] = await db.delete(usersTable)
-            .where(eq( usersTable.id, id ))
-            .returning();
+        // const [deleted] = await db.delete(usersTable)
+        //     .where(eq( usersTable.id, id ))
+        //     .returning();
+        const deleted = await db.update(usersTable)
+                .set({ is_active: false, deleted_at: new Date() })
+                .where(eq(usersTable.id, id))
+                .returning();
             
         return UserEntity.fromObject( deleted! );
 
@@ -87,7 +98,10 @@ export class UserDatasourceImpl implements UserDatasource{
         
         const [user] = await db.select()
             .from( usersTable )
-            .where( eq( usersTable.email, email ) );
+            .where( and(
+                eq( usersTable.email, email ),
+                eq(usersTable.is_active, true)
+            ))
 
         if ( !user ) return null;
 

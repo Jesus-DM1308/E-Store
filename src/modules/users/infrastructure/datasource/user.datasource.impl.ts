@@ -77,20 +77,37 @@ export class UserDatasourceImpl implements UserDatasource{
         
     }
 
+    private applyTimestampEmail(originalEmail: string ): string{
+        const timestamp = Date.now(); 
+        const [user, domain] = originalEmail.split('@');
+        return `${user}+deleted${timestamp}@${domain}`;
+    }
 
     async deleteById(id: string): Promise<UserEntity> {
-        await this.findById( id );
+        const userFound = await this.findById( id );
 
+        const modifiedEmail = this.applyTimestampEmail(userFound.email);
+        
+        const response = await db.update(usersTable)
+        .set({ 
+            is_active: false, 
+            deleted_at: new Date(),
+            email: modifiedEmail
+        })
+        .where(eq(usersTable.id, id))
+        .returning();
+        
+        const deletedUser = response[0];
+        
+        if(!deletedUser){
+            throw CustomError.internalServer();
+        }
+        
+        return UserEntity.fromObject( deletedUser );
+        
         // const [deleted] = await db.delete(usersTable)
         //     .where(eq( usersTable.id, id ))
         //     .returning();
-        const deleted = await db.update(usersTable)
-                .set({ is_active: false, deleted_at: new Date() })
-                .where(eq(usersTable.id, id))
-                .returning();
-            
-        return UserEntity.fromObject( deleted! );
-
     }
 
     

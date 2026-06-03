@@ -52,7 +52,10 @@ export class UsersController {
         if( error ) return res.status( 400 ).json({ error });
 
         const user = await new RegisterUser( this.userRepository ).execute( registerUserDto! );
-        return res.status(201).json( user );       
+        return res.status(201).json({
+            message: 'El usuario ha sido creado exitosamente.',
+            user: user
+        });    
 
     }
 
@@ -69,7 +72,10 @@ export class UsersController {
         if( error ) return res.status( 400 ).json({ error });
 
         const user = await new UpdateUser( this.userRepository ).execute( updateUserDto! );
-        return res.json( user );
+        return res.status(200).json({
+            message: 'El usuario ha sido modificado exitosamente.',
+            user: user
+        });
 
     }
 
@@ -84,7 +90,10 @@ export class UsersController {
         }
 
         const user = await new DeleteUser( this.userRepository ).execute( id );
-        return res.json( user );
+        return res.status(200).json({
+            message: 'El usuario ha sido eliminado exitosamente.',
+            user: user
+        });
 
     }
     

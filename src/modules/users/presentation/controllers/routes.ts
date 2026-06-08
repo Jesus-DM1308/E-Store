@@ -3,6 +3,8 @@ import { UserDatasourceImpl, UserRepositoryImpl } from '../../infrastructure/ind
 import { AuthMiddleware, UsersController } from '../index.js';
 import { catchAsync } from '../../../../shared/infrastructure/http/utils/catch-async.js';
 
+import { DrizzleOrderDatasource, OrderRepositoryImpl } from '../../../orders/infrastructure/index.js';
+
 
 export class UsersRoutes {
 
@@ -10,9 +12,15 @@ export class UsersRoutes {
 
     const router = Router();
 
+    // users
     const datasource = new UserDatasourceImpl();
     const userRepository = new UserRepositoryImpl( datasource );
-    const userController = new UsersController( userRepository );
+
+    // orders
+    const orderDatasource = new DrizzleOrderDatasource();
+    const orderRepository = new OrderRepositoryImpl(orderDatasource);
+
+    const userController = new UsersController( userRepository, orderRepository );
 
     const admin = 'ADMIN';
 

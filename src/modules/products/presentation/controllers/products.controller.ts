@@ -1,6 +1,5 @@
-import { CreateProductService, UpdateProductService, DeleteProductService, GetProductService, CreateProductDto } from '../../application/index.js';
+import { CreateProductService, UpdateProductService, DeleteProductService, GetProductService, GetProductsService, CreateProductDto } from '../../application/index.js';
 import { Request, Response } from 'express';
-import { ProductRepository } from '../../domain/index.js';
 import { CustomError } from '../../../../shared/domain/index.js';
 
 export class ProductsController{
@@ -9,17 +8,17 @@ export class ProductsController{
         private readonly updateProductService: UpdateProductService,
         private readonly deleteProductService: DeleteProductService,
         private readonly getProductService: GetProductService,
-        private readonly productRepository: ProductRepository
+        private readonly getProductsService: GetProductsService,
     ){};
 
     getAll = async ( req: Request, res: Response ) => {
-        const products = await this.productRepository.getAll();
+        const products = await this.getProductsService.execute();
         res.status(200).json(products);
     };
 
     getById = async ( req: Request, res: Response ) => {
         const id  = Number(req.params.id);
-        if( isNaN(id) ){
+        if( !Number.isInteger( id ) || id <= 0 ){
             throw CustomError.badRequest('Id del producto no valida')
         };
         const product = await this.getProductService.execute( id );
@@ -38,7 +37,7 @@ export class ProductsController{
 
     updateById = async ( req: Request, res: Response ) => {
         const id  = Number( req.params.id );
-        if( isNaN( id ) ){
+        if( !Number.isInteger( id ) || id <= 0  ){
             throw CustomError.badRequest('Id del producto no valida')
         };
         const product = await this.updateProductService.execute( id, req.body );
@@ -50,7 +49,7 @@ export class ProductsController{
 
     deleteById = async ( req: Request, res: Response ) => {
         const id  = Number( req.params.id );
-        if( isNaN( id ) ){
+        if( !Number.isInteger( id ) || id <= 0 ){
             throw CustomError.badRequest('Id del producto no valida')
         };
         const product = await this.deleteProductService.execute( id );

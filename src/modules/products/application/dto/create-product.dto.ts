@@ -2,10 +2,10 @@ import { CustomError } from "../../../../shared/domain/index.js";
 
 interface CreateProductProps{
     name: string,
-    description: string,
+    description?: string,
     price: number,
     stock: number,
-    img: string
+    img?: string
 };
 
 export class CreateProductDto{
@@ -31,20 +31,31 @@ export class CreateProductDto{
         };
         if(stock === undefined){
             throw CustomError.badRequest('Stock del producto es requerido');
-        };
-        
+        };  
 
         //Parsings
         const parsedPrice = Number(price);
+        const parsedStock = Number(stock);
 
+        //Validations
         if(isNaN(parsedPrice)){
             throw CustomError.badRequest('Precio del producto debe ser un numero');
         };
 
-        const parsedStock = Number(stock);
-
         if(isNaN(parsedStock)){
             throw CustomError.badRequest('Stock del producto debe ser un numero');
+        };
+
+        if(parsedPrice <= 0){
+            throw CustomError.badRequest('Precio del producto debe ser mayor a 0');
+        };
+        
+        if(parsedStock < 0){
+            throw CustomError.badRequest('Stock del producto no puede ser menor a 0');
+        };
+
+        if(description !== undefined && description.length > 255){
+            throw CustomError.badRequest('Descripcion del producto no puede ser mayor a 255 caracteres');
         };
 
         return new CreateProductDto({

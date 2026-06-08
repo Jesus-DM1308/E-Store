@@ -19,18 +19,6 @@ export class CreateProductService{
         } = data.props;
 
         //Reglas de negocio
-        if(price <= 0){
-            throw CustomError.badRequest('Precio del producto debe ser mayor a 0');
-        };
-        
-        if(stock < 0){
-            throw CustomError.badRequest('Stock del producto no puede ser menor a 0');
-        };
-
-        if(description.length > 255){
-            throw CustomError.badRequest('Descripcion del producto no puede ser mayor a 255 caracteres');
-        };
-
         const exists = await this.productRepository.findByName(name);
         if( exists ){
             throw CustomError.conflict('Nombre del producto ya existe');

@@ -10,7 +10,8 @@ import {
   CreateProductService,
   UpdateProductService,
   DeleteProductService,
-  GetProductService
+  GetProductService,
+  GetProductsService
 } from "../../application/index.js";
 
 import {
@@ -49,6 +50,11 @@ const getProductService =
     repository
   );
 
+const getProductsService =
+  new GetProductsService(
+    repository
+  );
+
 // controller
 export const productsController =
   new ProductsController(
@@ -56,5 +62,5 @@ export const productsController =
     updateProductService,
     deleteProductService,
     getProductService,
-    repository
+    getProductsService
   );

@@ -1,11 +1,11 @@
 export class OrderEntity{
     constructor(
         public id: number,
-        public addressId: number,
+        public statusId: number,
         public userId: string,
         public total: number,
-        public status: string,
-        public orderDate: Date,
+        public address: unknown,
+        public deliveryDate: Date | null,
         public updatedAt: Date,
         public createdAt: Date,
     ){};

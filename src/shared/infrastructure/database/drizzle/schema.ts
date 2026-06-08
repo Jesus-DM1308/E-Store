@@ -23,9 +23,11 @@ export const productsTable = pgTable("products", {
   updated_at: timestamp().defaultNow().notNull(),
 });
 
+
+
 export const addressTable = pgTable("address", {
   id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
-  user_id: integer().notNull(),
+  user_id: integer().notNull().references(() => usersTable.id, { onDelete: 'cascade' }),
   street: varchar({length: 255}).notNull(),
   colony: varchar({length: 255}).notNull(),
   references: varchar({length: 255}).notNull(),

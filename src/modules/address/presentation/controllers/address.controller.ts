@@ -5,6 +5,14 @@ export class AddressController {
 
     constructor() {}
 
+    static getAll = async ( req: Request, res: Response) => {
+        return res.status(202).json({
+            message: 'Get all Address of User by User Registered',
+            address: 'STREETS',
+            status: 'Not Implemented',
+        });
+    };
+
     // GET USER DATA => VALIDATION => INSERT INTO DB
     static getAddress = async (req: Request, res: Response) => {
 
@@ -16,7 +24,7 @@ export class AddressController {
             address4: 'STREET4',
             status: 'Not Implemented',
         });
-    }
+    };
 
     // DATA: id, user_id, street, colony, references, postal_code, updatedAt, createdAt
     static createAddress = async (req: Request, res: Response) => {
@@ -33,7 +41,7 @@ export class AddressController {
             address: `Address Created: ${addressEntity}`,
             status: 'Not Implemented'
         }));
-    }
+    };
 
     static updateAddress = async (req: Request, res: Response) => {
         return res.status(202).json({
@@ -41,7 +49,7 @@ export class AddressController {
             address: 'NEW STREET',
             status: 'Not Implemented',
         });
-    }
+    };
 
     // NOT DELETE => HIDE OR ADDRESS BOOLEAN = FALSE
     static deleteAddress = async (req: Request, res: Response) => {

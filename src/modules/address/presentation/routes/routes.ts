@@ -1,10 +1,18 @@
 import { Router } from 'express';
+import { AddressController } from '../controllers/address.controller.js';
 
-const router = Router();
+export class AddressRoutes{
 
-router.get('/:user') // WORKING
-router.post('/:user') // NOT IMPLEMENTED
-router.put('/address') // NOT IMPLEMENTED
-router.delete('/address') // NOT IMPLEMENTED
+    static get routes(): Router {
 
-export default router;
+        const router = Router();
+        
+        router.get('/', AddressController.getAll ); // NOT IMPLEMENTED
+        router.get('/:id', AddressController.getById ); // WORKING
+        router.post('/', AddressController.create ); // NOT IMPLEMENTED
+        router.put('/:id', AddressController.updateById ); // NOT IMPLEMENTED
+        router.delete('/:id', AddressController.deleteById ); // NOT IMPLEMENTED
+
+        return router;
+    };
+};

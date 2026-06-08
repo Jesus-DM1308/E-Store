@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { AddressEntity } from "../../domain/entity/address.entity.js";
+import { CreateAddressDto } from "../../application/dto/create-address.dto.js";
 
 export class AddressController {
 
@@ -22,24 +23,21 @@ export class AddressController {
             address2: 'STREET2',
             address3: 'STREET3',
             address4: 'STREET4',
-            status: 'Not Implemented',
         });
     };
 
     // DATA: id, user_id, street, colony, references, postal_code, updatedAt, createdAt
     static createAddress = async (req: Request, res: Response) => {
-
-        const {id, user_id, street, colony, references, postal_code} = req.body;
+        const dto = CreateAddressDto.create(req.body);
+        console.log(dto)
         const updatedAt = new Date();
         const createdAt = new Date();
-        const addressEntity = new AddressEntity( id, user_id, street, colony, references, postal_code, updatedAt, createdAt);
 
         // SEND IT TO DTO
 
         return res.status(202).json(({
             message: 'Create Address of User',
-            address: `Address Created: ${addressEntity}`,
-            status: 'Not Implemented'
+            address: {dto},
         }));
     };
 

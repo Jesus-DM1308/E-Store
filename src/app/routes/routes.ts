@@ -10,6 +10,7 @@ export class AppRoutes {
     
     router.use('/products', ProductsRoutes.routes );
     router.use('/users', UsersRoutes.routes );
+    router.use('/address' ); // AGREGAR RUTA ADDRESS
     
     return router;
   };

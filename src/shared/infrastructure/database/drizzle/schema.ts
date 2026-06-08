@@ -22,3 +22,14 @@ export const productsTable = pgTable("products", {
   created_at: timestamp().defaultNow().notNull(),
   updated_at: timestamp().defaultNow().notNull(),
 });
+
+export const addressTable = pgTable("address", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+  user_id: integer().notNull(),
+  street: varchar({length: 255}).notNull(),
+  colony: varchar({length: 255}).notNull(),
+  references: varchar({length: 255}).notNull(),
+  postal_code: varchar({length: 255}).notNull(),
+  updated_at: timestamp().defaultNow().notNull(),
+  created_at: timestamp().defaultNow().notNull(),
+});

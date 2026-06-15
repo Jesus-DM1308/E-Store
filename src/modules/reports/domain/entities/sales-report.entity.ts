@@ -1,12 +1,12 @@
-import { ReportOrderEntity } from "../index.js";
-
 export class SalesReportEntity {
   constructor(
     public readonly startDate: Date,
     public readonly endDate: Date,
+    public readonly sellerName: string,
     public readonly totalEarnings: number,
-    public readonly totalOrders: number,
+    public readonly successfulOrders: number,
+    public readonly refundedOrders: number,
     public readonly averageTicket: number,
-    public readonly orders: ReportOrderEntity[]
+    public readonly topSellingProduct: string
   ) {}
 }

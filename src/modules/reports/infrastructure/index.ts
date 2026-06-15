@@ -1,4 +1,6 @@
 
+//datasource
+export * from './datasources/report.datasource.impl.js';
 
 // mapper
 export * from './mappers/sales-report.mapper.js';

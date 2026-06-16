@@ -30,6 +30,12 @@ export class ReportRoutes {
       catchAsync( AuthMiddleware.validateRoles( sellerRole ) ),
       catchAsync( controller.getSalesReport )
     );
+
+    router.get('/sales-pdf',
+      catchAsync( AuthMiddleware.validateJWT ),
+      catchAsync( AuthMiddleware.validateRoles( sellerRole ) ),
+      catchAsync( controller.getSalesReportPdf )
+    );
     
 
     return router;

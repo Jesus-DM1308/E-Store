@@ -12,11 +12,13 @@ export class ReportDatasourceImpl implements ReportDatasource {
   async getSalesReport(startDate: Date, endDate: Date, sellerId: string): Promise<SalesReportEntity> {
 
 
-    // inicio y fin de las fechasde todo el dia
     const startOfPeriod = new Date(startDate);
-    startOfPeriod.setHours(0, 0, 0, 0);
     const endOfPeriod = new Date(endDate);
-    endOfPeriod.setHours(23, 59, 59, 999);
+
+    
+    // inicio y fin de las fechasde todo el dia
+    startOfPeriod.setUTCHours(0, 0, 0, 0);
+    endOfPeriod.setUTCHours(23, 59, 59, 999);
 
 
     // ids del status en la basde de datos( en si podrian cambiar si se cambian los status)

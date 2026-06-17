@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { GetSalesReport } from '../../../reports/application/index.js';
-import { PdfService } from '../../infrastructure/services/pdf.service.js'; // 🛠️ REFACTOR: Importación limpia arriba
+import { PdfService } from '../../infrastructure/index.js';
+
 
 
 

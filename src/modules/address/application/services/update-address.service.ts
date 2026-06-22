@@ -24,14 +24,6 @@ export class UpdateAddressService{
             postal_code,
         } = data.props;
 
-        if( street !== undefined ){
-            const nameExists = await this.AddressRepository.findByName(street);
-            //Evitar duplicado de nombre validando que no se compare asi mismo
-            if( nameExists?.street === name && nameExists.id !== id){
-                throw CustomError.conflict('Nombre del producto ya existe.');
-            };
-        };
-
         return await this.AddressRepository.updateById(id, data);
     };
 };

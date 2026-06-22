@@ -13,13 +13,12 @@ export class AddressController {
         private readonly AddressRepository: AddressRepository
     ) {}
 
-    getAll = async ( req: Request, res: Response) => {
-        return res.status(202).json({
-            message: 'Get all Address of User by User Registered',
-            address: 'STREETS',
-            status: 'Not Implemented',
-        });
-    };
+    // getAll = async ( req: Request, res: Response) => {
+    //     return res.status(202).json({
+    //         message: 'Get all Address of User by User Registered',
+    //         address: 'STREETS',
+    //     });
+    // };
 
     // GET USER DATA => VALIDATION => INSERT INTO DB
     getAddress = async (req: Request, res: Response) => {
@@ -45,26 +44,29 @@ export class AddressController {
     };
 
     updateAddress = async (req: Request, res: Response) => {
-        return res.status(202).json({
-            message: 'Update Address of User by User Registered',
-            address: 'NEW STREET',
-            status: 'Not Implemented',
+        const id  = Number( req.params.id );
+        if( isNaN( id ) ){
+            throw CustomError.badRequest('Id de Address no valida')
+        };
+
+        const address = await this.updateAddressService.execute( id, req.body );
+        res.status(200).json({
+            message: 'La Dirección ha sido modificada Exitosamente:',
+            address: address,    
         });
     };
 
     // NOT DELETE => HIDE OR ADDRESS BOOLEAN = FALSE
     deleteAddress = async (req: Request, res: Response) => {
-        return res.status(202).json({
-            message: 'Delete Address of User by User Registered',
-            address: 'DELETED STREET',
-            status: 'Not Implemented',
-        });
-    }
+        const id  = Number( req.params.id );
+        if( isNaN( id ) ){
+            throw CustomError.badRequest('Id de Address no valida')
+        };
 
-    testAddress = async (req: Request, res: Response) => {
-        console.log('testAddress');
-        res.status(202).json({
-            message: 'Test Zone for Address',
+        const address = await this.deleteAddressService.execute( id );
+        res.status( 200 ).json({
+            message: 'La Dirección ha sido eliminado Exitosamente:',
+            address: address,
         });
     }
 }

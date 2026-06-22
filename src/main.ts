@@ -3,7 +3,7 @@ import { envs } from './config/envs.js';
 import { AppRoutes } from './app/routes/routes.js';
 
 (async () => {
-    main();
+    await main();
 })();
 
 async function main(){
@@ -16,5 +16,5 @@ async function main(){
         appRoutes
     );
 
-    server.start();
+    await server.start();
 }

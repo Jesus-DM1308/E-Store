@@ -50,6 +50,17 @@ export const orderDetailTable = pgTable("order_detail", {
   updated_at: timestamp().defaultNow().notNull()
 });
 
+export const addressTable = pgTable("address", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+  user_id: uuid('user_id').notNull().references(() => usersTable.id, { onDelete: 'restrict' }),
+  street: varchar({length: 255}).notNull(),
+  colony: varchar({length: 255}).notNull(),
+  references: varchar({length: 255}).notNull(),
+  postal_code: varchar({length: 255}).notNull(),
+  updated_at: timestamp().defaultNow().notNull(),
+  created_at: timestamp().defaultNow().notNull(),
+});
+
 export const statusOrder = pgTable('status_order', {
   id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
   status: varchar({ length: 255 }).notNull()

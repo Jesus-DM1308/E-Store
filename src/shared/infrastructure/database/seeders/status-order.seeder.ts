@@ -5,13 +5,13 @@ import { Pool } from 'pg';
 import { statusOrder } from '../drizzle-orm/schema.js';
 
 const ORDER_STATUSES = [
-  'Pendiente',
-  'Aprobado',
-  'Enviado',
-  'En transito',
-  'Entregado',
-  'Cancelado',
-  'Reembolsado'
+  'PENDIENTE',
+  'APROBADO',
+  'ENVIADO',
+  'IN_TRANSIT',
+  'DELIVERED',
+  'CANCELLED',
+  'REFUNDED'
 ];
 
 const pool = new Pool({

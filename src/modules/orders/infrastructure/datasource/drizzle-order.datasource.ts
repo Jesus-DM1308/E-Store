@@ -48,7 +48,6 @@ export class DrizzleOrderDatasource extends OrderDatasource {
         const {
             userId,
             address,
-            deliveryDate,
             details
         } = createOrderDto.props;
 
@@ -96,7 +95,6 @@ export class DrizzleOrderDatasource extends OrderDatasource {
                     user_id: userId,
                     total,
                     address,
-                    ...(deliveryDate !== undefined ? { delivery_date: deliveryDate } : {})
                 })
                 .returning();
 

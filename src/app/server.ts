@@ -6,10 +6,10 @@ export class Server{
     private serverListener?: any;
     
     private readonly routes: Router;
-    private readonly port: Number;
-    private readonly publicPath: String;
+    private readonly port: number;
+    private readonly publicPath: string;
     
-    constructor( port: Number, publicPath: String = 'public', routes: Router){
+    constructor( port: number, publicPath: string = 'public', routes: Router){
         this.port = port;
         this.publicPath = publicPath;
         this.routes = routes;

@@ -15,6 +15,8 @@ export class CreateAddressService{
             colony,
             references,
             postal_code,
+            updatedAt,
+            createdAt,
         } = data.props;
 
         //Reglas de negocio

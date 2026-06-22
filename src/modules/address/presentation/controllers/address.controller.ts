@@ -6,14 +6,14 @@ import { CustomError } from "../../../../shared/domain/index.js";
 export class AddressController {
 
     constructor(
-        private readonly createaddressService: CreateAddressService,
+        private readonly createAddressService: CreateAddressService,
         private readonly updateAddressService: UpdateAddressService,
         private readonly deleteAddressService: DeleteAddressService,
         private readonly getAddressService: GetAddressService,
         private readonly AddressRepository: AddressRepository
     ) {}
 
-    static getAll = async ( req: Request, res: Response) => {
+    getAll = async ( req: Request, res: Response) => {
         return res.status(202).json({
             message: 'Get all Address of User by User Registered',
             address: 'STREETS',
@@ -22,7 +22,7 @@ export class AddressController {
     };
 
     // GET USER DATA => VALIDATION => INSERT INTO DB
-    static getAddress = async (req: Request, res: Response) => {
+    getAddress = async (req: Request, res: Response) => {
 
         return res.status(202).json({
             message: 'Get Address of User by User Registered',
@@ -34,21 +34,17 @@ export class AddressController {
     };
 
     // DATA: id, user_id, street, colony, references, postal_code, updatedAt, createdAt
-    static createAddress = async (req: Request, res: Response) => {
-        const dto = CreateAddressDto.create(req.body);
-        console.log(dto)
-        const updatedAt = new Date();
-        const createdAt = new Date();
+    createAddress = async (req: Request, res: Response) => {
+        const dto = CreateAddressDto.create( req.body );
 
-        // SEND IT TO DTO
-
-        return res.status(202).json(({
-            message: 'Create Address of User',
-            address: {dto},
-        }));
+        const address = await this.createAddressService.execute(dto);
+        res.status(201).json({
+            message: 'La Dirección ha sido creado Exitosamente:',
+            address: address,
+        });
     };
 
-    static updateAddress = async (req: Request, res: Response) => {
+    updateAddress = async (req: Request, res: Response) => {
         return res.status(202).json({
             message: 'Update Address of User by User Registered',
             address: 'NEW STREET',
@@ -57,7 +53,7 @@ export class AddressController {
     };
 
     // NOT DELETE => HIDE OR ADDRESS BOOLEAN = FALSE
-    static deleteAddress = async (req: Request, res: Response) => {
+    deleteAddress = async (req: Request, res: Response) => {
         return res.status(202).json({
             message: 'Delete Address of User by User Registered',
             address: 'DELETED STREET',
@@ -65,7 +61,7 @@ export class AddressController {
         });
     }
 
-    static testAddress = async (req: Request, res: Response) => {
+    testAddress = async (req: Request, res: Response) => {
         console.log('testAddress');
         res.status(202).json({
             message: 'Test Zone for Address',

@@ -39,8 +39,8 @@ export class UpdateUserDto{
 
     static create(  props: {[key:string]: any}): [string?, UpdateUserDto?] {
         
-        let {name, last_name, password, cel, user_type } = props;
-        const { id, email } = props;
+        let {name, last_name, password, cel, user_type, email } = props;
+        const { id } = props;
         //let newUpdateAt = updated_at;
 
         const nameRegex = /^[A-ZÁÉÍÓÚÑa-zñáéíóúü][ ]?[A-ZÁÉÍÓÚÑa-zñáéíóúü]+(?:[ ]?[A-ZÁÉÍÓÚÑa-zñáéíóúü]+)*$/;
@@ -49,6 +49,8 @@ export class UpdateUserDto{
         // if( !id ){
         //     return ['id must be a valid string'];
         // }
+
+ 
 
         if( name ){
             
@@ -76,6 +78,9 @@ export class UpdateUserDto{
 
         }
 
+        if( email && typeof email === 'string'){
+            email = email.trim().toLowerCase();
+        }
 
         if ( email ) { 
             const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;

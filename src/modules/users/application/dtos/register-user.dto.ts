@@ -27,7 +27,7 @@ export class RegisterUserDto {
         const usersType = ['CLIENT', 'SELLER'];
         const number = 10;
 
-
+        
         if( !name ) {
             throw CustomError.badRequest('Name property is required');
         }
@@ -44,8 +44,12 @@ export class RegisterUserDto {
         if( !nameRegex.test( last_name )){
             throw CustomError.badRequest('Invalid last name format');
         }
+        
 
-        email = email.trim();
+        if( email && typeof email === 'string'){
+            email = email.trim().toLowerCase();
+        }
+        //email = email.trim();
         if( !email ) {
             throw CustomError.badRequest('Email property is required');
         }

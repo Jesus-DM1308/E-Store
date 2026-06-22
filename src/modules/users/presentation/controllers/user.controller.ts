@@ -3,6 +3,7 @@ import type { UserRepository } from "../../domain/index.js";
 import { DeleteUser, GetUser, GetUsers, RegisterUser, UpdateUser, RegisterUserDto, UpdateUserDto, LoginUser } from "../../application/index.js";
 import { LoginUserDto } from "../../application/dtos/login-user.dto.js";
 import { CustomError } from "../../../../shared/domain/errors/custom-error.js";
+import { OrderRepository } from "../../../orders/domain/index.js";
 
 
 
@@ -10,6 +11,7 @@ export class UsersController {
 
     constructor(
         private readonly userRepository: UserRepository,
+        private readonly orderRepository: OrderRepository
     ){}
 
 
@@ -89,7 +91,8 @@ export class UsersController {
             throw CustomError.forbidden('You cannot delete other accounts.')
         }
 
-        const user = await new DeleteUser( this.userRepository ).execute( id );
+        //console.log(this.orderRepository);
+        const user = await new DeleteUser( this.userRepository, this.orderRepository ).execute( id );
         return res.status(200).json({
             message: 'El usuario ha sido eliminado exitosamente.',
             user: user

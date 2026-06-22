@@ -56,10 +56,18 @@ export class UserDatasourceImpl implements UserDatasource{
 
     async updateById(updateUserDto: UpdateUserDto): Promise<UserEntity> {
         
-        await this.findById( updateUserDto.id );
+        const currentUser = await this.findById( updateUserDto.id );
 
         const dataToUpdate = updateUserDto.values;
 
+        if ( dataToUpdate.email && dataToUpdate.email !== currentUser.email ) {
+            const userWithThatEmail = await this.findByEmail( dataToUpdate.email );
+            
+            // existe ese correo y NO es el usuario actual ?
+            if ( userWithThatEmail && userWithThatEmail.id !== updateUserDto.id ) {
+                throw CustomError.badRequest('El correo electrónico ya se encuentra registrado por otro usuario.');
+            }
+        }
        
         if( dataToUpdate.password ){
             dataToUpdate.password = BcryptAdapter.hash( dataToUpdate.password );
@@ -73,6 +81,10 @@ export class UserDatasourceImpl implements UserDatasource{
             ))
             .returning();
         
+        if ( !updatedUser ) {
+            throw CustomError.badRequest('No se pudo actualizar el usuario.');
+        }
+    
         return UserEntity.fromObject( updatedUser! );
         
     }

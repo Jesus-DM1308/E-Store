@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { AddressController } from '../controllers/address.controller.js';
+import { addressController } from '../dependencies/dependencies.js';
+import { catchAsync } from '../../../../shared/infrastructure/index.js';
 
 export class AddressRoutes {
 
@@ -8,11 +9,10 @@ export class AddressRoutes {
     static get routes(): Router {
         const router = Router();
 
-        router.get('/list', AddressController.getAddress);
-        router.post('/create', AddressController.createAddress);
-        router.put('/update', AddressController.updateAddress);
-        router.delete('/delete', AddressController.deleteAddress);
-        router.get('/test', AddressController.testAddress);
+        router.get('/list/:id', addressController.getAddress);
+        router.post('/create', catchAsync(addressController.createAddress));
+        router.put('/update/:id', addressController.updateAddress);
+        router.delete('/delete/:id', addressController.deleteAddress);
 
         return router;
     }

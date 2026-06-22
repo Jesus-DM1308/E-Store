@@ -1,10 +1,17 @@
+import { CreateAddressService, UpdateAddressService, DeleteAddressService, GetAddressService, CreateAddressDto } from "../../application/index.js";
 import { Request, Response } from "express";
-import { AddressEntity } from "../../domain/entity/address.entity.js";
-import { CreateAddressDto } from "../../application/dto/create-address.dto.js";
+import { AddressRepository } from "../../domain/index.js";
+import { CustomError } from "../../../../shared/domain/index.js";
 
 export class AddressController {
 
-    constructor() {}
+    constructor(
+        private readonly createaddressService: CreateAddressService,
+        private readonly updateAddressService: UpdateAddressService,
+        private readonly deleteAddressService: DeleteAddressService,
+        private readonly getAddressService: GetAddressService,
+        private readonly AddressRepository: AddressRepository
+    ) {}
 
     static getAll = async ( req: Request, res: Response) => {
         return res.status(202).json({

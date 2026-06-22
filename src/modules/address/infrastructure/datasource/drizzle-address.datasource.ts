@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { db, productsTable } from "../../../../shared/infrastructure/index.js";
 import { AddressEntity, AddressDatasource } from "../../domain/index.js";
 import { CreateAddressDto, UpdateAddressDto } from "../../application/index.js";
-import { AddressMapper } from "../mappers/product.mapper.js";
+import { AddressMapper } from "../mappers/address.mapper.js";
 
 export class DrizzleAddressDataSource extends AddressDatasource {
 

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { AddressController } from '../controllers/address.controller.js';
+import { AddressController } from '../dependencies/dependencies.js';
 import { catchAsync } from '../../../../shared/infrastructure/index.js';
 
 export class AddressRoutes {

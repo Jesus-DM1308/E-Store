@@ -13,10 +13,10 @@ export class DeleteOrderService {
             throw CustomError.notFound('La id de la orden ingresada no existe.');
         };
 
-        const deletedOrder = await this.orderRepository.deleteById(id);
+        const deletedOrder = await this.orderRepository.cancelById(id);
 
         if (!deletedOrder) {
-            throw CustomError.internalServer();
+            throw CustomError.badRequest('La orden no puede ser cancelada en su estado actual.');
         };
 
         return deletedOrder;

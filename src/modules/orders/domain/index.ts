@@ -1,3 +1,6 @@
+//Constants
+export * from './constants/status.constant.js';
+
 // Entities
 export * from './entities/order.entity.js';
 export * from './entities/order-detail.entity.js';

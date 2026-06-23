@@ -1,5 +1,5 @@
 import { CustomError } from "../../../../shared/domain/errors/custom-error.js";
-import { OrderRepository } from "../../../orders/domain/index.js";
+import { OrderEntity, OrderRepository, statusCode } from "../../../orders/domain/index.js";
 import type { UserEntity, UserRepository } from "../../domain/index.js";
 
 
@@ -20,25 +20,25 @@ export class DeleteUser implements DeleteUserUseCases {
 
     async execute(id: string): Promise<UserEntity> {
 
-        const userOrders = await this.orderRepository.getByUserId(id);
+        const userOrders = await this.orderRepository.getAllByUserId(id);
 
         const statusMap: { [key: number]: string } = {
-            1: 'Pendiente',
-            2: 'Aprobado',
-            3: 'Enviado',
-            4: 'En transito',
-            5: 'Entregado',
-            6: 'Cancelado',
-            7: 'Reembolsado'
+            1: statusCode.PENDING,
+            2: statusCode.ACCEPTED,
+            3: statusCode.PROCESSING,
+            4: statusCode.SHIPPED,
+            5: statusCode.DELIVERED,
+            6: statusCode.RETURNED,
+            7: statusCode.CANCELLED
         };
 
 
-        const hasActiveOrders = userOrders.some( order => {
+        const hasActiveOrders = userOrders.some((order: OrderEntity) => {
             const statusText = statusMap[order.statusId]
             return (
-                statusText !== 'Cancelado' && 
-                statusText !== 'Entregado' && 
-                statusText !== 'Reembolsado'
+                statusText !== statusCode.CANCELLED && 
+                statusText !== statusCode.DELIVERED && 
+                statusText !== statusCode.RETURNED
             );
         });
         

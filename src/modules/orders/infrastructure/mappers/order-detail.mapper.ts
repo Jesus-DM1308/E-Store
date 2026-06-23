@@ -4,22 +4,22 @@ export class OrderDetailMapper {
     static toEntity(object: { [key: string]: any }): OrderDetailEntity {
         const {
             id,
-            order_id,
-            product_id,
+            orderId,
+            productId,
             quantity,
-            unit_price,
-            updated_at,
-            created_at
+            unitPrice,
+            updatedAt,
+            createdAt
         } = object;
 
         return new OrderDetailEntity(
             id,
-            order_id,
-            product_id,
+            orderId,
+            productId,
             quantity,
-            unit_price,
-            updated_at,
-            created_at
+            unitPrice,
+            updatedAt,
+            createdAt
         );
     };
 }

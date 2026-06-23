@@ -9,7 +9,7 @@ export class DrizzleProductDataSource extends ProductDatasource {
     async getById( id: number ): Promise<ProductEntity | null> {
         const [product] = await db.select()
                                 .from( productsTable )
-                                .where(and(eq( productsTable.id, id), eq( productsTable.is_active, true)))
+                                .where(and(eq( productsTable.id, id), eq( productsTable.isActive, true)))
         if (!product) {
             return null;
         };
@@ -19,7 +19,7 @@ export class DrizzleProductDataSource extends ProductDatasource {
     async getAll( ): Promise<ProductEntity[]> {
         const allProducts = await db.select()
                                     .from( productsTable )
-                                    .where(eq( productsTable.is_active, true));
+                                    .where(eq( productsTable.isActive, true));
         return allProducts.map( product => ProductMapper.toEntity(product));
     };
 
@@ -38,9 +38,9 @@ export class DrizzleProductDataSource extends ProductDatasource {
         const [product] = await db.update( productsTable )
                                 .set({
                                     ...updateProductDto.props,
-                                    updated_at: new Date()
+                                    updatedAt: new Date()
                                 })
-                                .where(and(eq( productsTable.id, id), eq( productsTable.is_active, true)))
+                                .where(and(eq( productsTable.id, id), eq( productsTable.isActive, true)))
                                 .returning();
         if (!product) {
             return null;
@@ -51,8 +51,8 @@ export class DrizzleProductDataSource extends ProductDatasource {
     async deleteById( id: number ): Promise<ProductEntity | null> {
         const [product] = await db.update( productsTable )
                                 .set({
-                                    is_active: false,
-                                    deleted_at: new Date()
+                                    isActive: false,
+                                    deletedAt: new Date()
                                 })
                                 .where(eq( productsTable.id, id))
                                 .returning();
@@ -65,7 +65,7 @@ export class DrizzleProductDataSource extends ProductDatasource {
     async findByName( name: string ): Promise<ProductEntity | null>{
         const [product] = await db.select()
                                 .from( productsTable )
-                                .where(and(eq( productsTable.name, name), eq( productsTable.is_active, true)));
+                                .where(and(eq( productsTable.name, name), eq( productsTable.isActive, true)));
         if (!product) {
             return null;
         }

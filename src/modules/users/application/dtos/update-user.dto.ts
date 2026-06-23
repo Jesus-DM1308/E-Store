@@ -20,18 +20,18 @@ export class UpdateUserDto{
 
         if( this.name ) returnObj['name'] = this.name;
 
-        if( this.lastName ) returnObj['last_name'] = this.lastName;
+        if( this.lastName ) returnObj['lastName'] = this.lastName;
 
         if( this.email ) returnObj['email'] = this.email;
         if( this.password ) returnObj['password'] = this.password;
 
         if( this.cel ) returnObj['cel'] = this.cel;
 
-        if( this.userType ) returnObj['user_type'] = this.userType;
+        if( this.userType ) returnObj['userType'] = this.userType;
 
         //if( this.updatedAt ) returnObj['updated_at'] = this.updatedAt;
 
-        returnObj['updated_at'] = new Date();
+        returnObj['updatedAt'] = new Date();
 
         return returnObj;
     }

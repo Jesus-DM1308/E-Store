@@ -22,11 +22,11 @@ export class UserDatasourceImpl implements UserDatasource{
 
         const [user] = await db.insert(usersTable).values({
                 name: registerUserDto.name,
-                last_name: registerUserDto.lastName,
+                lastName: registerUserDto.lastName,
                 email: registerUserDto.email,
                 password: registerUserDto.password,
                 cel: registerUserDto.cel,
-                user_type: registerUserDto.userType,
+                userType: registerUserDto.userType,
         }).returning();
 
         return UserEntity.fromObject( user! );
@@ -46,7 +46,7 @@ export class UserDatasourceImpl implements UserDatasource{
             .from(usersTable)
             .where(and(
                 eq(usersTable.id, id),
-                eq(usersTable.is_active, true)
+                eq(usersTable.isActive, true)
             ));
     
         if(!user) throw CustomError.notFound(`User with id ${ id } not found`);
@@ -77,7 +77,7 @@ export class UserDatasourceImpl implements UserDatasource{
             .set( dataToUpdate )
             .where(and(
                 eq( usersTable.id, updateUserDto.id ),
-                eq(usersTable.is_active, true)
+                eq(usersTable.isActive, true)
             ))
             .returning();
         
@@ -102,8 +102,8 @@ export class UserDatasourceImpl implements UserDatasource{
         
         const response = await db.update(usersTable)
         .set({ 
-            is_active: false, 
-            deleted_at: new Date(),
+            isActive: false, 
+            deletedAt: new Date(),
             email: modifiedEmail
         })
         .where(eq(usersTable.id, id))
@@ -129,7 +129,7 @@ export class UserDatasourceImpl implements UserDatasource{
             .from( usersTable )
             .where( and(
                 eq( usersTable.email, email ),
-                eq(usersTable.is_active, true)
+                eq(usersTable.isActive, true)
             ))
 
         if ( !user ) return null;

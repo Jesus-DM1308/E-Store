@@ -9,7 +9,7 @@ export class CreateProductService{
     ){};
 
     async execute( data: CreateProductDto){
-        //Se desestrcutura desde el objeto data directamente
+        //Se desestructura desde el objeto data directamente
         const {
             name,
             description,

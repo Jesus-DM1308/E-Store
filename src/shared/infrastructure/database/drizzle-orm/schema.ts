@@ -1,56 +1,56 @@
-import { json, integer, pgTable, varchar, numeric, timestamp, uuid, boolean } from "drizzle-orm/pg-core";
+import { text, json, integer, pgTable, varchar, numeric, timestamp, uuid, boolean } from "drizzle-orm/pg-core";
 
-export const usersTable = pgTable("user", {
+export const usersTable = pgTable(`user`, {
   id: uuid('id').defaultRandom().primaryKey(),
   name: varchar({ length: 255 }).notNull(),
-  last_name: varchar({ length: 255 }).notNull(),
+  lastName: varchar(`last_name`, { length: 255 }).notNull(),
   email: varchar({ length: 255 }).notNull().unique(),
   password: varchar({ length: 255 }).notNull(),
   cel: varchar({ length: 10 }).notNull(),
-  user_type: varchar({ length: 255 }).notNull(),
-  is_active: boolean().default(true). notNull(),
-  deleted_at: timestamp(),
-  updated_at: timestamp(),
-  created_at: timestamp().defaultNow()
+  userType: varchar(`user_type`, { length: 255 }).notNull(),
+  isActive: boolean(`is_active`).default(true). notNull(),
+  deletedAt: timestamp(`deleted_at`),
+  createdAt: timestamp(`created_at`).defaultNow().notNull(),
+  updatedAt: timestamp(`updated_at`).defaultNow().notNull(),
 });
 
-export const productsTable = pgTable("product", {
+export const productsTable = pgTable(`product`, {
   id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
   name: varchar({ length: 255 }).notNull(),
   description: varchar({ length: 255 }),
   price: numeric({ mode: 'number' }).notNull(),
   stock: integer().notNull(),
   img: varchar({ length: 255 }),
-  is_active: boolean().default(true). notNull(),
-  deleted_at: timestamp(),
-  created_at: timestamp().defaultNow().notNull(),
-  updated_at: timestamp().defaultNow().notNull(),
+  isActive: boolean(`is_active`).default(true). notNull(),
+  deletedAt: timestamp(`deleted_at`),
+  createdAt: timestamp(`created_at`).defaultNow().notNull(),
+  updatedAt: timestamp(`updated_at`).defaultNow().notNull(),
 });
 
 
-export const orderTable = pgTable('order', {
+export const orderTable = pgTable(`order`, {
   id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
   //address_id: integer('address_id').notNull().references(() => addressTable.id),
-  status: integer().notNull().references(() => statusOrder.id, { onDelete: 'restrict'}),
-  user_id: uuid('user_id').notNull().references(() => usersTable.id, { onDelete: 'restrict' }),
-  total: numeric({ mode: 'number' }).notNull(),
+  statusId: integer(`status_id`).notNull().references(() => statusOrder.id, { onDelete: 'restrict'}),
+  userId: uuid(`user_id`).notNull().references(() => usersTable.id, { onDelete: 'restrict' }),
+  total: numeric({ mode: `number` }).notNull(),
   address: json().notNull(),
-  delivery_date: timestamp(),
-  updated_at: timestamp().defaultNow().notNull(),
-  created_at: timestamp().defaultNow().notNull()
+  deliveryDate: timestamp(`delivery_date`),
+  updatedAt: timestamp(`updated_at`).defaultNow().notNull(),
+  createdAt: timestamp(`created_at`).defaultNow().notNull()
 });
 
-export const orderDetailTable = pgTable("order_detail", {
+export const orderDetailTable = pgTable(`order_detail`, {
   id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
-  order_id: integer('order_id').notNull().references(() => orderTable.id, { onDelete: 'restrict' }),
-  product_id: integer('product_id').notNull().references(() => productsTable.id, { onDelete: 'restrict' }),
+  orderId: integer(`order_id`).notNull().references(() => orderTable.id, { onDelete: 'restrict' }),
+  productId: integer(`product_id`).notNull().references(() => productsTable.id, { onDelete: 'restrict' }),
   quantity: integer().notNull(),
-  unit_price: numeric({ mode: 'number' }).notNull(),
-  created_at: timestamp().defaultNow().notNull(),
-  updated_at: timestamp().defaultNow().notNull()
+  unitPrice: numeric(`unit_price`, { mode: 'number' }).notNull(),
+  createdAt: timestamp(`created_at`).defaultNow().notNull(),
+  updatedAt: timestamp(`updated_at`).defaultNow().notNull()
 });
 
-export const statusOrder = pgTable('status_order', {
+export const statusOrder = pgTable(`status_order`, {
   id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
-  status: varchar({ length: 255 }).notNull()
+  code: text().notNull()
 });

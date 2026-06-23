@@ -3,16 +3,9 @@ import { eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import { statusOrder } from '../drizzle-orm/schema.js';
+import { statusCode } from '../../../../modules/orders/domain/index.js';
 
-const ORDER_STATUSES = [
-  'Pendiente',
-  'Aprobado',
-  'Enviado',
-  'En transito',
-  'Entregado',
-  'Cancelado',
-  'Reembolsado'
-];
+const ORDER_STATUSES = Object.values(statusCode);
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL!,
@@ -24,14 +17,14 @@ async function seedStatusOrder() {
   for (const status of ORDER_STATUSES) {
     const [existingStatus] = await db.select()
       .from(statusOrder)
-      .where(eq(statusOrder.status, status));
+      .where(eq(statusOrder.code, status));
 
     if (existingStatus) {
       continue;
     };
 
     await db.insert(statusOrder)
-      .values({ status });
+      .values({ code: status });
   };
 }
 

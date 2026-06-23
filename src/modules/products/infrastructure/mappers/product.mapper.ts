@@ -9,8 +9,8 @@ export class ProductMapper {
             price,
             stock,
             img,
-            created_at,
-            updated_at
+            createdAt,
+            updatedAt
         } = object;
 
         return new ProductEntity(
@@ -20,8 +20,8 @@ export class ProductMapper {
             price,
             stock,
             img,
-            created_at,
-            updated_at
+            createdAt,
+            updatedAt
         );
     };
 };

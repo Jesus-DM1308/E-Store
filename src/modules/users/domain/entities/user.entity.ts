@@ -19,18 +19,18 @@ export class UserEntity {
 
 
     public static fromObject( object: {[key: string]: any}): UserEntity {
-        const {id, name, last_name, email, password, cel, is_active,user_type, delete_at, created_at, updated_at} = object;
+        const {id, name, lastName, email, password, cel, isActive, userType, deletedAt, createdAt, updatedAt} = object;
         if( !id ) throw Error('Id is required');
         if( !name ) throw Error('Name is required');
-        if( !last_name ) throw Error('Last name is required');
+        if( !lastName ) throw Error('Last name is required');
         if( !password ) throw Error('Password is required');
         if( !cel ) throw Error('Cel is required');
-        if( !user_type ) throw Error('user type is required');
+        if( !userType ) throw Error('user type is required');
 
    
 
         return new UserEntity(
-            id, name, last_name, email, password, cel, is_active, user_type, delete_at, created_at, updated_at );
+            id, name, lastName, email, password, cel, isActive, userType, deletedAt, createdAt, updatedAt );
    }
 
 

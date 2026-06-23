@@ -5,17 +5,16 @@ export class OrderRepositoryImpl implements OrderRepository {
     constructor(
         private readonly orderDatasource: OrderDatasource
     ){};
+    async getById(id: number): Promise<OrderEntity | null> {
+        return this.orderDatasource.getById(id);
+    };
 
     async getAll(): Promise<OrderEntity[]> {
         return this.orderDatasource.getAll();
     };
 
-    async getById(id: number): Promise<OrderEntity | null> {
-        return this.orderDatasource.getById(id);
-    };
-
-    async getByUserId(userId: string): Promise<OrderEntity[]> {
-        return this.orderDatasource.getByUserId(userId);
+    async getAllByUserId(userId: string): Promise<OrderEntity[]> {
+        return this.orderDatasource.getAllByUserId(userId);
     };
 
     async getDetailsByOrderId(orderId: number): Promise<OrderDetailEntity[]> {
@@ -30,7 +29,7 @@ export class OrderRepositoryImpl implements OrderRepository {
         return this.orderDatasource.updateStatus(id, updateOrderStatusDto);
     };
 
-    async deleteById(id: number): Promise<OrderEntity | null> {
-        return this.orderDatasource.deleteById(id);
+    async cancelById(id: number): Promise<OrderEntity | null> {
+        return this.orderDatasource.cancelById(id);
     };
 }

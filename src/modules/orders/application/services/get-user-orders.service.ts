@@ -6,6 +6,6 @@ export class GetUserOrdersService {
     ){};
 
     async execute(userId: string) {
-        return this.orderRepository.getByUserId(userId);
+        return this.orderRepository.getAllByUserId(userId);
     };
 }

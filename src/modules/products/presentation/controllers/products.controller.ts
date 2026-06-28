@@ -26,8 +26,12 @@ export class ProductsController{
     };
 
     create = async ( req: Request, res: Response ) => {
+        const userId = req.userTokenData?.id;
         const dto = CreateProductDto.create( req.body );
 
+        if (!userId) {
+            throw CustomError.unauthorized('Usuario no autenticado');
+        };
         const product = await this.createproductService.execute( dto );
         res.status(201).json({
             message: 'El producto ha sido creado exitosamente:',

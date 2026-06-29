@@ -22,14 +22,10 @@ export class AddressController {
 
     // GET USER DATA => VALIDATION => INSERT INTO DB
     getAddress = async (req: Request, res: Response) => {
-
-        return res.status(202).json({
-            message: 'Get Address of User by User Registered',
-            address1: 'STREET1',
-            address2: 'STREET2',
-            address3: 'STREET3',
-            address4: 'STREET4',
-        });
+        const id = Number(req.params.id);
+        if(isNaN(id)) throw CustomError.badRequest('Id no válida');
+        const address = await this.getAddressService.execute(id);
+        res.status(200).json(address);
     };
 
     // DATA: id, user_id, street, colony, references, postal_code, updatedAt, createdAt

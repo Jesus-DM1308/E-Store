@@ -4,6 +4,7 @@ export class AddressMapper {
     static toEntity( object: { [ key: string ]: any } ): AddressEntity{
         const {
             id,
+            user_id,
             street,
             colony,
             references,
@@ -14,6 +15,7 @@ export class AddressMapper {
 
         return new AddressEntity(
             id,
+            user_id,
             street,
             colony,
             references,

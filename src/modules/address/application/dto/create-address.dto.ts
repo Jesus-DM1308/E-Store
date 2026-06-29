@@ -1,17 +1,18 @@
 import { CustomError } from "../../../../shared/domain/index.js";
 
-interface CreateProductProps{
+interface CreateAddressProps{
     street: string,
     colony: string,
     references: string,
     postal_code: string,
+    user_id: string;
     updatedAt: Date;
     createdAt: Date;
 };
 
 export class CreateAddressDto{
     private constructor(
-        public readonly props: CreateProductProps
+        public readonly props: CreateAddressProps
     ){};
     
     static create( object: {[key: string]: any}): CreateAddressDto{
@@ -20,12 +21,13 @@ export class CreateAddressDto{
             colony,
             references,
             postal_code,
+            user_id,
             updatedAt = new Date(),
             createdAt = new Date(),
         } = object;
 
         //Existence of Attributes
-        if(!street || !colony || !references || !postal_code){
+        if(!street || !colony || !references || !postal_code || !user_id){
             throw CustomError.badRequest('LLenar Todos los Campos Solicitados');
         };
 
@@ -54,6 +56,7 @@ export class CreateAddressDto{
             colony,
             references,
             postal_code,
+            user_id,
             updatedAt,
             createdAt,
         });

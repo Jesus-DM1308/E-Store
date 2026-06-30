@@ -1,4 +1,5 @@
 import { AddressEntity } from '../../domain/entity/address.entity.js';
+
 export class AddressMapper {
 
     static toEntity( object: { [ key: string ]: any } ): AddressEntity{
@@ -20,8 +21,8 @@ export class AddressMapper {
             colony,
             references,
             postal_code,
-            updated_at,
-            created_at,
+            updated_at,   
+            created_at,    
         );
     };
 };

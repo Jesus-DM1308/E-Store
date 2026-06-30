@@ -9,17 +9,14 @@ export class CreateAddressService{
     ){};
 
     async execute( data: CreateAddressDto){
-        //Se desestrcutura desde el objeto data directamente
         const {
             street,
             colony,
             references,
             postal_code,
-            updatedAt,
-            createdAt,
+            user_id,
         } = data.props;
 
-        //Reglas de negocio
         if(!street){
             throw CustomError.badRequest('Error en Street');
         };
@@ -34,6 +31,10 @@ export class CreateAddressService{
 
         if(!postal_code){
             throw CustomError.badRequest('Error en Postal code');
+        };
+
+        if(!user_id){
+            throw CustomError.badRequest('Error en user_id');
         };
         
         return await this.AddressRepository.create( data );

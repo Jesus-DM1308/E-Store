@@ -13,28 +13,30 @@ export class AddressController {
         private readonly AddressRepository: AddressRepository
     ) {}
 
-    // getAll = async ( req: Request, res: Response) => {
-    //     return res.status(202).json({
-    //         message: 'Get all Address of User by User Registered',
-    //         address: 'STREETS',
-    //     });
-    // };
+    
+    getAll = async (req: Request, res: Response) => {
+        const addresses = await this.AddressRepository.getAll();
+        res.status(200).json(addresses);
+    };
 
-    // GET USER DATA => VALIDATION => INSERT INTO DB
-    getAddress = async (req: Request, res: Response) => {
+    
+    getAddress = async (req: any, res: Response) => {
         const id = Number(req.params.id);
-        if(isNaN(id)) throw CustomError.badRequest('Id no válida');
+        if(isNaN(id)) throw CustomError.badRequest('Id de Address no válida');
         const address = await this.getAddressService.execute(id);
         res.status(200).json(address);
     };
 
-    // DATA: id, user_id, street, colony, references, postal_code, updatedAt, createdAt
-    createAddress = async (req: Request, res: Response) => {
-        const dto = CreateAddressDto.create( req.body );
+    
+    createAddress = async (req: any, res: Response) => {
+        const user_id = req.userTokenData?.id;  
+        if(!user_id) throw CustomError.unauthorized('No autenticado');
+
+        const dto = CreateAddressDto.create({ ...req.body, user_id });
 
         const address = await this.createAddressService.execute(dto);
         res.status(201).json({
-            message: 'La Dirección ha sido creado Exitosamente:',
+            message: 'La dirección ha sido creada exitosamente',
             address: address,
         });
     };
@@ -42,26 +44,25 @@ export class AddressController {
     updateAddress = async (req: Request, res: Response) => {
         const id  = Number( req.params.id );
         if( isNaN( id ) ){
-            throw CustomError.badRequest('Id de Address no valida')
+            throw CustomError.badRequest('Id de Address no válida')
         };
 
         const address = await this.updateAddressService.execute( id, req.body );
         res.status(200).json({
-            message: 'La Dirección ha sido modificada Exitosamente:',
+            message: 'La dirección ha sido modificada exitosamente',
             address: address,    
         });
     };
 
-    // NOT DELETE => HIDE OR ADDRESS BOOLEAN = FALSE
     deleteAddress = async (req: Request, res: Response) => {
         const id  = Number( req.params.id );
         if( isNaN( id ) ){
-            throw CustomError.badRequest('Id de Address no valida')
+            throw CustomError.badRequest('Id de Address no válida')
         };
 
         const address = await this.deleteAddressService.execute( id );
         res.status( 200 ).json({
-            message: 'La Dirección ha sido eliminado Exitosamente:',
+            message: 'La dirección ha sido eliminada exitosamente',
             address: address,
         });
     }

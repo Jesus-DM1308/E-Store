@@ -33,7 +33,7 @@ export class UsersController {
         
     }
     
-    public getUserById = async(req: any, res: Response ) => {
+    public getUserById = async(req: Request, res: Response ) => {
 
         const id = req.params.id as string;
 
@@ -61,7 +61,7 @@ export class UsersController {
 
     }
 
-    public updateUser = async( req: any, res: Response ) => {
+    public updateUser = async( req: Request, res: Response ) => {
 
         const id = req.params.id as string;
 
@@ -82,7 +82,7 @@ export class UsersController {
     }
 
 
-    public deleteUser = async( req: any, res: Response ) => {
+    public deleteUser = async( req: Request, res: Response ) => {
 
         const id = req.params.id as string;
 

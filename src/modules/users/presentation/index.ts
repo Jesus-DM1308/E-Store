@@ -3,7 +3,7 @@
 
 // controllers
 export * from './controllers/user.controller.js'
-export * from './controllers/routes.js';
+export * from './routes/routes.js';
 
 
 // middlewares

@@ -32,6 +32,11 @@ export class LoginUserDto {
         if( !password ) {
             throw CustomError.badRequest('Password property is required');
         }
+
+        if( typeof password !== 'string' ){
+            throw CustomError.badRequest('Password must be a valid text string');
+        }
+
         password = password.trim();
         if( !passRegex.test( password )){
             throw CustomError.badRequest('Invalid password format');

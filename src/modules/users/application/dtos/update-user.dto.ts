@@ -20,18 +20,18 @@ export class UpdateUserDto{
 
         if( this.name ) returnObj['name'] = this.name;
 
-        if( this.lastName ) returnObj['last_name'] = this.lastName;
+        if( this.lastName ) returnObj['lastName'] = this.lastName;
 
         if( this.email ) returnObj['email'] = this.email;
         if( this.password ) returnObj['password'] = this.password;
 
         if( this.cel ) returnObj['cel'] = this.cel;
 
-        if( this.userType ) returnObj['user_type'] = this.userType;
+        if( this.userType ) returnObj['userType'] = this.userType;
 
         //if( this.updatedAt ) returnObj['updated_at'] = this.updatedAt;
 
-        returnObj['updated_at'] = new Date();
+        returnObj['updatedAt'] = new Date();
 
         return returnObj;
     }
@@ -39,7 +39,7 @@ export class UpdateUserDto{
 
     static create(  props: {[key:string]: any}): [string?, UpdateUserDto?] {
         
-        let {name, last_name, password, cel, user_type, email } = props;
+        let {name, lastName, password, cel, userType, email } = props;
         const { id } = props;
         //let newUpdateAt = updated_at;
 
@@ -65,14 +65,14 @@ export class UpdateUserDto{
 
         }
 
-        if( last_name ){
+        if( lastName ){
 
-            if( typeof last_name !== 'string' ){
+            if( typeof lastName !== 'string' ){
                 throw CustomError.badRequest('Last name must be a valid text string');
             }
 
-            last_name = last_name.trim();
-            if( !nameRegex.test( last_name )){
+            lastName = lastName.trim();
+            if( !nameRegex.test( lastName )){
                 throw CustomError.badRequest('Invalid last name format');
             }
 
@@ -94,7 +94,7 @@ export class UpdateUserDto{
         // }
 
 
-        if( password ){ // minimo    MAY        min         num          caracter        8 caracteres
+        if( password ){ // minimo    MAY        min        num         caracter        8 caracteres
             const passRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
             //validar si es string
             if( typeof password !== 'string'){
@@ -133,11 +133,11 @@ export class UpdateUserDto{
 
 
 
-        if ( user_type ) {
+        if ( userType ) {
             const usersType = ['CLIENT', 'SELLER'];
-            user_type = user_type.trim().toUpperCase();
+            userType = userType.trim().toUpperCase();
             
-            if ( !usersType.includes(user_type) ) {
+            if ( !usersType.includes(userType) ) {
                 throw CustomError.badRequest('Invalid user type');
             }
         }
@@ -151,11 +151,9 @@ export class UpdateUserDto{
         // }
 
         return [ '' , new UpdateUserDto( 
-                id, name, last_name, email, password, cel, user_type)];
+                id, name, lastName, email, password, cel, userType)];
     }
 
 
     
 }
-
-

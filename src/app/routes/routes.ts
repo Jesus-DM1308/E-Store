@@ -9,7 +9,7 @@ export class AppRoutes {
     const router = Router();
     
     router.use('/products', ProductsRoutes.routes );
-    router.use('/api/users', UsersRoutes.routes );
+    router.use('/users', UsersRoutes.routes );
     
     return router;
   };

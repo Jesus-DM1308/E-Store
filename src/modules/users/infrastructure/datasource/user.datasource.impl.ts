@@ -1,12 +1,11 @@
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { db } from "../../../../shared/infrastructure/database/drizzle/connection.js";
 import { usersTable } from "../../../../shared/infrastructure/database/drizzle/schema.js";
-
 import type { RegisterUserDto, UpdateUserDto } from "../../application/index.js";
 import { UserEntity, type UserDatasource } from "../../domain/index.js";
 import { BcryptAdapter } from "../../../../config/bcrypt.adapter.js";
 import { CustomError } from "../../../../shared/domain/errors/custom-error.js";
-
+import { UserMapper } from "../index.js";
 
 
 export class UserDatasourceImpl implements UserDatasource{
@@ -21,21 +20,24 @@ export class UserDatasourceImpl implements UserDatasource{
 
         const [user] = await db.insert(usersTable).values({
                 name: registerUserDto.name,
-                last_name: registerUserDto.lastName,
+                lastName: registerUserDto.lastName,
                 email: registerUserDto.email,
                 password: registerUserDto.password,
                 cel: registerUserDto.cel,
-                user_type: registerUserDto.userType,
+                userType: registerUserDto.userType,
         }).returning();
 
-        return UserEntity.fromObject( user! );
+        return UserMapper.toEntity( user! )
+
     }
 
 
     async getAll(): Promise<UserEntity[]> {
 
         const users = await db.select().from(usersTable);
-        return users.map( user => UserEntity.fromObject( user ));
+        
+        
+        return users.map( user => UserMapper.toEntity( user ));
         
     }
 
@@ -43,19 +45,33 @@ export class UserDatasourceImpl implements UserDatasource{
 
         const [user] = await db.select()
             .from(usersTable)
-            .where(eq(usersTable.id, id));
+            .where(and(
+                eq(usersTable.id, id),
+                eq(usersTable.isActive, true)
+            ));
     
-        if(!user) throw CustomError.badRequest(`User with id ${ id } not found`);
-        return UserEntity.fromObject(user);
+        if(!user) throw CustomError.notFound(`User with id ${ id } not found`);
+        
+        
+        return UserMapper.toEntity(user);
+
     }
 
 
     async updateById(updateUserDto: UpdateUserDto): Promise<UserEntity> {
         
-        await this.findById( updateUserDto.id );
+        const currentUser = await this.findById( updateUserDto.id );
 
         const dataToUpdate = updateUserDto.values;
 
+        if ( dataToUpdate.email && dataToUpdate.email !== currentUser.email ) {
+            const userWithThatEmail = await this.findByEmail( dataToUpdate.email );
+            
+            // existe ese correo y NO es el usuario actual ?
+            if ( userWithThatEmail && userWithThatEmail.id !== updateUserDto.id ) {
+                throw CustomError.badRequest('El correo electrónico ya se encuentra registrado por otro usuario.');
+            }
+        }
        
         if( dataToUpdate.password ){
             dataToUpdate.password = BcryptAdapter.hash( dataToUpdate.password );
@@ -63,22 +79,53 @@ export class UserDatasourceImpl implements UserDatasource{
 
         const [updatedUser] = await db.update(usersTable)
             .set( dataToUpdate )
-            .where(eq( usersTable.id, updateUserDto.id ))
+            .where(and(
+                eq( usersTable.id, updateUserDto.id ),
+                eq(usersTable.isActive, true)
+            ))
             .returning();
         
-        return UserEntity.fromObject( updatedUser! );
+        if ( !updatedUser ) {
+            throw CustomError.badRequest('No se pudo actualizar el usuario.');
+        }
+    
+        
+        return UserMapper.toEntity( updatedUser! );
         
     }
 
+    private applyTimestampEmail(originalEmail: string ): string{
+        const timestamp = Date.now(); 
+        const [user, domain] = originalEmail.split('@');
+        return `${user}+deleted${timestamp}@${domain}`;
+    }
 
     async deleteById(id: string): Promise<UserEntity> {
-        await this.findById( id );
+        const userFound = await this.findById( id );
 
-        const [deleted] = await db.delete(usersTable)
-            .where(eq( usersTable.id, id ))
-            .returning();
-            
-        return UserEntity.fromObject( deleted! );
+        const modifiedEmail = this.applyTimestampEmail(userFound.email);
+        
+        const response = await db.update(usersTable)
+        .set({ 
+            isActive: false,
+            deletedAt: new Date(),
+            email: modifiedEmail
+        })
+        .where(eq(usersTable.id, id))
+        .returning();
+        
+        const deletedUser = response[0];
+        
+        if(!deletedUser){
+            throw CustomError.internalServer();
+        }
+        
+
+        return UserMapper.toEntity( deletedUser );
+        
+        // const [deleted] = await db.delete(usersTable)
+        //     .where(eq( usersTable.id, id ))
+        //     .returning();
 
     }
 
@@ -87,13 +134,15 @@ export class UserDatasourceImpl implements UserDatasource{
         
         const [user] = await db.select()
             .from( usersTable )
-            .where( eq( usersTable.email, email ) );
+            .where( and(
+                eq( usersTable.email, email ),
+                eq(usersTable.isActive, true)
+            ))
 
         if ( !user ) return null;
 
-        return UserEntity.fromObject( user );
+
+        return UserMapper.toEntity( user );
     }
     
-
 }
-

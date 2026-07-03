@@ -3,6 +3,7 @@ import type { UserRepository } from "../../domain/index.js";
 import { DeleteUser, GetUser, GetUsers, RegisterUser, UpdateUser, RegisterUserDto, UpdateUserDto, LoginUser } from "../../application/index.js";
 import { LoginUserDto } from "../../application/dtos/login-user.dto.js";
 import { CustomError } from "../../../../shared/domain/errors/custom-error.js";
+// import { OrderRepository } from "../../../orders/domain/index.js";
 
 
 
@@ -10,6 +11,7 @@ export class UsersController {
 
     constructor(
         private readonly userRepository: UserRepository,
+        // private readonly orderRepository: OrderRepository
     ){}
 
 
@@ -31,7 +33,7 @@ export class UsersController {
         
     }
     
-    public getUserById = async(req: any, res: Response ) => {
+    public getUserById = async(req: Request, res: Response ) => {
 
         const id = req.params.id as string;
 
@@ -52,11 +54,14 @@ export class UsersController {
         if( error ) return res.status( 400 ).json({ error });
 
         const user = await new RegisterUser( this.userRepository ).execute( registerUserDto! );
-        return res.status(201).json( user );       
+        return res.status(201).json({
+            message: 'El usuario ha sido creado exitosamente.',
+            user: user
+        });    
 
     }
 
-    public updateUser = async( req: any, res: Response ) => {
+    public updateUser = async( req: Request, res: Response ) => {
 
         const id = req.params.id as string;
 
@@ -69,12 +74,15 @@ export class UsersController {
         if( error ) return res.status( 400 ).json({ error });
 
         const user = await new UpdateUser( this.userRepository ).execute( updateUserDto! );
-        return res.json( user );
+        return res.status(200).json({
+            message: 'El usuario ha sido modificado exitosamente.',
+            user: user
+        });
 
     }
 
 
-    public deleteUser = async( req: any, res: Response ) => {
+    public deleteUser = async( req: Request, res: Response ) => {
 
         const id = req.params.id as string;
 
@@ -83,8 +91,12 @@ export class UsersController {
             throw CustomError.forbidden('You cannot delete other accounts.')
         }
 
-        const user = await new DeleteUser( this.userRepository ).execute( id );
-        return res.json( user );
+        //console.log(this.orderRepository);
+        const user = await new DeleteUser( this.userRepository  /*, this.orderRepository*/ ).execute( id );
+        return res.status(200).json({
+            message: 'El usuario ha sido eliminado exitosamente.',
+            user: user
+        });
 
     }
     

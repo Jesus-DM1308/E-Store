@@ -3,6 +3,8 @@ import { UserDatasourceImpl, UserRepositoryImpl } from '../../infrastructure/ind
 import { AuthMiddleware, UsersController } from '../index.js';
 import { catchAsync } from '../../../../shared/infrastructure/http/utils/catch-async.js';
 
+// import { DrizzleOrderDatasource, OrderRepositoryImpl } from '../../../orders/infrastructure/index.js';
+
 
 export class UsersRoutes {
 
@@ -10,25 +12,34 @@ export class UsersRoutes {
 
     const router = Router();
 
+    // users
     const datasource = new UserDatasourceImpl();
     const userRepository = new UserRepositoryImpl( datasource );
+
+    // // orders
+    // const orderDatasource = new DrizzleOrderDatasource();
+    // const orderRepository = new OrderRepositoryImpl(orderDatasource);
+
     const userController = new UsersController( userRepository );
 
+    const admin = 'ADMIN';
 
-    // router.get('/', 
-    //   catchAsync(userController.getUsers) 
-    // );
+    // login
+    router.post('/login', catchAsync(userController.loginUser) );
+    
+    // creacion(registro)
+    router.post('/', catchAsync(userController.registerUser) );
+    
+    router.get('/',
+      catchAsync(AuthMiddleware.validateJWT),
+      catchAsync(AuthMiddleware.validateRoles(admin)),
+      catchAsync(userController.getUsers) 
+    );
 
     router.get('/:id', 
       catchAsync(AuthMiddleware.validateJWT),
       catchAsync(userController.getUserById) 
     );
-    
-    // creacion(registro)
-    router.post('/', catchAsync(userController.registerUser) );
-
-    // login
-    router.post('/login', catchAsync(userController.loginUser) );
 
     // modificacion
     router.put('/:id', 
@@ -36,14 +47,11 @@ export class UsersRoutes {
       catchAsync(userController.updateUser) 
     );
 
-
     router.delete('/:id', 
       catchAsync(AuthMiddleware.validateJWT),
       catchAsync(userController.deleteUser) 
-    );
-
+    ); 
         
     return router;
-  }
-
-}
+  };
+};

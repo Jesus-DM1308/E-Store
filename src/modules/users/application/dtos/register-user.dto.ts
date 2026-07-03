@@ -16,7 +16,7 @@ export class RegisterUserDto {
 
     static create( props: {[key:string]: any}): [string?, RegisterUserDto?]{
 
-        let {name, last_name, password, cel, email, user_type } = props;
+        let {name, lastName, password, cel, email, userType } = props;
        
 
         const nameRegex = /^[A-ZÁÉÍÓÚÑa-zñáéíóúü][ ]?[A-ZÁÉÍÓÚÑa-zñáéíóúü]+(?:[ ]?[A-ZÁÉÍÓÚÑa-zñáéíóúü]+)*$/;
@@ -27,7 +27,7 @@ export class RegisterUserDto {
         const usersType = ['CLIENT', 'SELLER'];
         const number = 10;
 
-
+        
         if( !name ) {
             throw CustomError.badRequest('Name property is required');
         }
@@ -37,15 +37,19 @@ export class RegisterUserDto {
         }
 
 
-        if( !last_name ) {
+        if( !lastName ) {
             throw CustomError.badRequest('Last Name property is required');
         }
-        last_name = last_name.trim();
-        if( !nameRegex.test( last_name )){
+        lastName = lastName.trim();
+        if( !nameRegex.test( lastName )){
             throw CustomError.badRequest('Invalid last name format');
         }
+        
 
-        email = email.trim();
+        if( email && typeof email === 'string'){
+            email = email.trim().toLowerCase();
+        }
+        //email = email.trim();
         if( !email ) {
             throw CustomError.badRequest('Email property is required');
         }
@@ -75,17 +79,17 @@ export class RegisterUserDto {
         }
         
 
-        if( !user_type ) {
+        if( !userType ) {
             throw CustomError.badRequest('User type property is required');
         }
         
-        user_type = user_type.trim().toUpperCase();
-        if( !usersType.includes(user_type )) {
+        userType = userType.trim().toUpperCase();
+        if( !usersType.includes(userType )) {
             throw CustomError.badRequest('Invalid user type');
         }
         
 
-        return ['', new RegisterUserDto( name, last_name, email, password, cel, user_type )];
+        return ['', new RegisterUserDto( name, lastName, email, password, cel, userType )];
 
     }
 

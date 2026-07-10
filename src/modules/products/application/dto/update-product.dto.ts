@@ -1,74 +1,49 @@
 import { CustomError } from '../../../../shared/domain/index.js';
+import { LENGTH_LIMIT } from '../../domain/constants/length-limit.constant.js';
 
-export interface UpdateProductProps{
-    name?: string;
-    description?: string,
-    price?: number;
-    stock?: number,
-    img?: string
-};
+export interface UpdateProductProps {
+  name?: string;
+  description?: string;
+  brand?: string;
+  image?: string;
+}
 
-export class UpdateProductDto{
+export class UpdateProductDto {
+  private constructor(public readonly props: UpdateProductProps) {}
 
-    private constructor(
-        public readonly props: UpdateProductProps
-    ){};
+  static create(object: { [key: string]: any }): UpdateProductDto {
+    const { name, description, brand, image } = object;
 
-    static create( object: {[key: string]: any}): UpdateProductDto{
-        const {
-            name,
-            description,
-            price,
-            stock,
-            img
-        } = object;
+    const updatedProduct: UpdateProductProps = {};
 
-        const updatedProduct: UpdateProductProps = {};
+    if (name !== undefined) {
+      updatedProduct.name = name;
+    }
 
-        if(name !== undefined){
-            updatedProduct.name = name;
-        };
+    if (description !== undefined) {
+      if (description.length > LENGTH_LIMIT) {
+        throw CustomError.badRequest(
+          `La descripcion del producto no puede ser mayor a ${LENGTH_LIMIT} caracteres.`,
+        );
+      }
 
-        if(description !== undefined){
-            updatedProduct.description = description;
-        };
+      updatedProduct.description = description;
+    }
 
-        if(img !== undefined){
-            updatedProduct.img = img;
-        };
+    if (brand !== undefined) {
+      if (brand.length > LENGTH_LIMIT) {
+        throw CustomError.badRequest(
+          `La marca del producto no puede ser mayor a ${LENGTH_LIMIT} caracteres.`,
+        );
+      }
 
-        if(price !== undefined){
-            const parsedPrice = Number(price);
+      updatedProduct.brand = brand;
+    }
 
-            if(isNaN(parsedPrice)){
-                throw CustomError.badRequest('Precio del producto debe ser un numero');
-            };
+    if (image !== undefined) {
+      updatedProduct.image = image;
+    }
 
-            if(parsedPrice <= 0){
-                throw CustomError.badRequest('Precio del producto debe ser mayor a 0.');
-            };
-
-            updatedProduct.price = parsedPrice;
-        };
-
-        if(stock !== undefined){
-            const parsedStock = Number(stock);
-
-            if(isNaN(parsedStock)){
-                throw CustomError.badRequest('Stock del producto debe ser un numero');
-            };
-
-            if(parsedStock < 0){
-                throw CustomError.badRequest('Stock del producto no puede ser menor a 0.');
-            };
-
-            updatedProduct.stock = parsedStock;
-        };
-
-        if(description !== undefined && description.length > 255){
-            throw CustomError.badRequest('Descripcion del producto no puede ser mayor a 255 caracteres');
-        };
-
-        return new UpdateProductDto(updatedProduct);
-    };
-};  
+    return new UpdateProductDto(updatedProduct);
+  }
+}

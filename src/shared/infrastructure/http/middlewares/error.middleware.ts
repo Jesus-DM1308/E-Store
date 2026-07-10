@@ -5,19 +5,17 @@ export const errorMiddleware = (
   error: unknown,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
-
   if (error instanceof CustomError) {
-
     return res.status(error.statusCode).json({
-      error: error.message
+      error: error.message,
     });
   }
 
   console.error(error);
 
   return res.status(500).json({
-    error: 'Internal server error'
+    error: 'Internal server error',
   });
 };

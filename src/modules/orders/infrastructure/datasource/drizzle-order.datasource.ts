@@ -1,168 +1,255 @@
-import { and, eq, inArray, sql } from "drizzle-orm";
-import { db, orderDetailTable, orderTable, productsTable, statusOrder } from "../../../../shared/infrastructure/index.js";
-import { CustomError } from "../../../../shared/domain/index.js";
-import { CreateOrderDto, UpdateOrderStatusDto } from "../../application/index.js";
-import { OrderDatasource, OrderDetailEntity, OrderEntity } from "../../domain/index.js";
-import { OrderMapper } from "../mappers/order.mapper.js";
-import { OrderDetailMapper } from "../mappers/order-detail.mapper.js";
+import { and, eq, inArray, sql } from 'drizzle-orm';
+import {
+  db,
+  orderDetailTable,
+  ordersTable,
+  productsTable,
+  productsUsersTable,
+  statusOrderTable,
+} from '../../../../shared/infrastructure/index.js';
+import { CustomError } from '../../../../shared/domain/index.js';
+import { CreateOrderDto } from '../../application/index.js';
+import {
+  OrderDatasource,
+  OrderDetailEntity,
+  OrderEntity,
+  OrderStatusCode,
+} from '../../domain/index.js';
+import { OrderMapper } from '../mappers/order.mapper.js';
+import { OrderDetailMapper } from '../mappers/order-detail.mapper.js';
 
-const DEFAULT_ORDER_STATUS = 'Pendiente';
+const DEFAULT_ORDER_STATUS = OrderStatusCode.PENDING;
 
 export class DrizzleOrderDatasource extends OrderDatasource {
-    async getAll(): Promise<OrderEntity[]> {
-        const orders = await db.select()
-            .from(orderTable);
+  async getById(id: number): Promise<OrderEntity | null> {
+    const [order] = await db
+      .select()
+      .from(ordersTable)
+      .where(eq(ordersTable.id, id));
 
-        return orders.map(order => OrderMapper.toEntity(order));
-    };
+    if (!order) {
+      return null;
+    }
 
-    async getById(id: number): Promise<OrderEntity | null> {
-        const [order] = await db.select()
-            .from(orderTable)
-            .where(eq(orderTable.id, id));
+    return OrderMapper.toEntity(order);
+  }
 
-        if (!order) {
-            return null;
-        };
+  async getAllByUserId(userId: string): Promise<OrderEntity[]> {
+    const orders = await db
+      .select()
+      .from(ordersTable)
+      .where(eq(ordersTable.userId, userId));
 
-        return OrderMapper.toEntity(order);
-    };
+    return orders.map((order) => OrderMapper.toEntity(order));
+  }
 
-    async getByUserId(userId: string): Promise<OrderEntity[]> {
-        const orders = await db.select()
-            .from(orderTable)
-            .where(eq(orderTable.user_id, userId));
+  async getAll(): Promise<OrderEntity[]> {
+    const orders = await db.select().from(ordersTable);
 
-        return orders.map(order => OrderMapper.toEntity(order));
-    };
+    return orders.map((order) => OrderMapper.toEntity(order));
+  }
 
-    async getDetailsByOrderId(orderId: number): Promise<OrderDetailEntity[]> {
-        const details = await db.select()
-            .from(orderDetailTable)
-            .where(eq(orderDetailTable.order_id, orderId));
+  async getDetailsByOrderId(orderId: number): Promise<OrderDetailEntity[]> {
+    const details = await db
+      .select()
+      .from(orderDetailTable)
+      .where(eq(orderDetailTable.orderId, orderId));
 
-        return details.map(detail => OrderDetailMapper.toEntity(detail));
-    };
+    return details.map((detail) => OrderDetailMapper.toEntity(detail));
+  }
 
-    async create(createOrderDto: CreateOrderDto): Promise<OrderEntity | null> {
-        const {
-            userId,
-            address,
-            details
-        } = createOrderDto.props;
+  async getStatusIdByCode(statusCode: OrderStatusCode): Promise<number | null> {
+    const [status] = await db
+      .select({ id: statusOrderTable.id })
+      .from(statusOrderTable)
+      .where(eq(statusOrderTable.code, statusCode));
 
-        return db.transaction(async (tx) => {
-            const productIds = details.map(detail => detail.productId);
+    return status?.id ?? null;
+  }
 
-            const [defaultStatus] = await tx.select()
-                .from(statusOrder)
-                .where(eq(statusOrder.status, DEFAULT_ORDER_STATUS));
+  async getStatusCodeById(statusId: number): Promise<OrderStatusCode | null> {
+    const [status] = await db
+      .select({ code: statusOrderTable.code })
+      .from(statusOrderTable)
+      .where(eq(statusOrderTable.id, statusId));
 
-            if (!defaultStatus) {
-                throw CustomError.badRequest('Default order status is not configured');
-            };
+    if (
+      !status ||
+      !Object.values(OrderStatusCode).includes(status.code as OrderStatusCode)
+    ) {
+      return null;
+    }
 
-            const products = await tx.select()
-                .from(productsTable)
-                .where(and(
-                    inArray(productsTable.id, productIds),
-                    eq(productsTable.is_active, true)
-                ));
+    return status.code as OrderStatusCode;
+  }
 
-            if (products.length !== productIds.length) {
-                throw CustomError.badRequest('One or more products do not exist');
-            };
+  async create(createOrderDto: CreateOrderDto): Promise<OrderEntity | null> {
+    const { userId, address, whoReceive, details } = createOrderDto.props;
 
-            let total = 0;
+    return db.transaction(async (tx) => {
+      const productUserIds = details.map((detail) => detail.productUserId);
 
-            for (const detail of details) {
-                const product = products.find(item => item.id === detail.productId);
+      const [defaultStatus] = await tx
+        .select()
+        .from(statusOrderTable)
+        .where(eq(statusOrderTable.code, DEFAULT_ORDER_STATUS));
 
-                if (!product) {
-                    throw CustomError.badRequest(`Product ${detail.productId} does not exist`);
-                };
+      if (!defaultStatus) {
+        throw CustomError.badRequest(
+          'El estado inicial de la orden no esta configurado.',
+        );
+      }
 
-                if (product.stock < detail.quantity) {
-                    throw CustomError.badRequest(`Product ${product.name} does not have enough stock`);
-                };
+      const sellerProducts = await tx
+        .select({
+          id: productsUsersTable.id,
+          productId: productsUsersTable.productId,
+          price: productsUsersTable.price,
+          stock: productsUsersTable.stock,
+          productName: productsTable.name,
+        })
+        .from(productsUsersTable)
+        .innerJoin(
+          productsTable,
+          eq(productsUsersTable.productId, productsTable.id),
+        )
+        .where(
+          and(
+            inArray(productsUsersTable.id, productUserIds),
+            eq(productsTable.isActive, true),
+          ),
+        );
 
-                total += product.price * detail.quantity;
-            };
+      if (sellerProducts.length !== productUserIds.length) {
+        throw CustomError.badRequest(
+          'Uno o mas productos del vendedor no existen.',
+        );
+      }
 
-            const [order] = await tx.insert(orderTable)
-                .values({
-                    status: defaultStatus.id,
-                    user_id: userId,
-                    total,
-                    address,
-                })
-                .returning();
+      let total = 0;
 
-            if (!order) {
-                return null;
-            };
+      for (const detail of details) {
+        const sellerProduct = sellerProducts.find(
+          (item) => item.id === detail.productUserId,
+        );
 
-            for (const detail of details) {
-                const product = products.find(item => item.id === detail.productId)!;
+        if (!sellerProduct) {
+          throw CustomError.badRequest(
+            `El producto del vendedor ${detail.productUserId} no existe.`,
+          );
+        }
 
-                await tx.insert(orderDetailTable)
-                    .values({
-                        order_id: order.id,
-                        product_id: detail.productId,
-                        quantity: detail.quantity,
-                        unit_price: product.price
-                    });
+        if (sellerProduct.stock < detail.quantity) {
+          throw CustomError.badRequest(
+            `El producto ${sellerProduct.productName} no tiene stock suficiente.`,
+          );
+        }
 
-                await tx.update(productsTable)
-                    .set({
-                        stock: sql`${productsTable.stock} - ${detail.quantity}`,
-                        updated_at: new Date()
-                    })
-                    .where(eq(productsTable.id, detail.productId));
-            };
+        total += sellerProduct.price * detail.quantity;
+      }
 
-            return OrderMapper.toEntity(order);
+      const [order] = await tx
+        .insert(ordersTable)
+        .values({
+          statusId: defaultStatus.id,
+          userId,
+          total,
+          address,
+          whoReceive,
+        })
+        .returning();
+
+      if (!order) {
+        return null;
+      }
+
+      for (const detail of details) {
+        const sellerProduct = sellerProducts.find(
+          (item) => item.id === detail.productUserId,
+        )!;
+
+        await tx.insert(orderDetailTable).values({
+          orderId: order.id,
+          productUserId: detail.productUserId,
+          quantity: detail.quantity,
+          unitPrice: sellerProduct.price,
         });
-    };
 
-    async updateStatus(id: number, updateOrderStatusDto: UpdateOrderStatusDto): Promise<OrderEntity | null> {
-        const [status] = await db.select()
-            .from(statusOrder)
-            .where(eq(statusOrder.id, updateOrderStatusDto.props.statusId));
+        await tx
+          .update(productsUsersTable)
+          .set({
+            stock: sql`${productsUsersTable.stock} - ${detail.quantity}`,
+            updatedAt: new Date(),
+          })
+          .where(eq(productsUsersTable.id, detail.productUserId));
+      }
 
-        if (!status) {
-            throw CustomError.badRequest('Order status does not exist');
-        };
+      return OrderMapper.toEntity(order);
+    });
+  }
 
-        const [order] = await db.update(orderTable)
-            .set({
-                status: updateOrderStatusDto.props.statusId,
-                updated_at: new Date()
-            })
-            .where(eq(orderTable.id, id))
-            .returning();
+  async updateStatus(
+    id: number,
+    statusId: number,
+    deliveryDate?: Date,
+  ): Promise<OrderEntity | null> {
+    const [order] = await db
+      .update(ordersTable)
+      .set({
+        statusId,
+        ...(deliveryDate !== undefined ? { deliveryDate } : {}),
+        updatedAt: new Date(),
+      })
+      .where(eq(ordersTable.id, id))
+      .returning();
 
-        if (!order) {
-            return null;
-        };
+    if (!order) {
+      return null;
+    }
 
-        return OrderMapper.toEntity(order);
-    };
+    return OrderMapper.toEntity(order);
+  }
 
-    async deleteById(id: number): Promise<OrderEntity | null> {
-        return db.transaction(async (tx) => {
-            await tx.delete(orderDetailTable)
-                .where(eq(orderDetailTable.order_id, id));
+  async cancelById(
+    id: number,
+    cancelledStatusId: number,
+  ): Promise<OrderEntity | null> {
+    const order = await db.transaction(async (tx) => {
+      const [updatedOrder] = await tx
+        .update(ordersTable)
+        .set({
+          statusId: cancelledStatusId,
+          updatedAt: new Date(),
+        })
+        .where(eq(ordersTable.id, id))
+        .returning();
 
-            const [order] = await tx.delete(orderTable)
-                .where(eq(orderTable.id, id))
-                .returning();
+      if (!updatedOrder) {
+        return null;
+      }
 
-            if (!order) {
-                return null;
-            };
+      const details = await tx
+        .select()
+        .from(orderDetailTable)
+        .where(eq(orderDetailTable.orderId, id));
 
-            return OrderMapper.toEntity(order);
-        });
-    };
+      for (const detail of details) {
+        await tx
+          .update(productsUsersTable)
+          .set({
+            stock: sql`${productsUsersTable.stock} + ${detail.quantity}`,
+            updatedAt: new Date(),
+          })
+          .where(eq(productsUsersTable.id, detail.productUserId));
+      }
+
+      return updatedOrder;
+    });
+
+    if (!order) {
+      return null;
+    }
+
+    return OrderMapper.toEntity(order);
+  }
 }

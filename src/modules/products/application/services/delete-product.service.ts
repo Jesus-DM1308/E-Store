@@ -1,19 +1,22 @@
-import { CustomError } from "../../../../shared/domain/index.js";
-import { ProductRepository } from "../../domain/index.js";
+import { CustomError } from '../../../../shared/domain/index.js';
+import { ProductRepository } from '../../domain/index.js';
 
-export class DeleteProductService{
+export class DeleteProductService {
+  constructor(private readonly productRepository: ProductRepository) {}
 
-    constructor(
-        private readonly productRepository: ProductRepository
-    ){};
+  async execute(id: number) {
+    // Verifica si el id del producto existe antes de eliminarlo de la base de datos
+    const idExist = await this.productRepository.getById(id);
+    if (!idExist) {
+      throw CustomError.notFound('El id del producto ingresado no existe.');
+    }
 
-    async execute(id: number){
+    const deletedProduct = await this.productRepository.deleteById(id);
 
-        const idExist = await this.productRepository.getById( id );
-        if( !idExist ){
-            throw CustomError.notFound('La id del producto ingresado no existe.')
-        };
+    if (!deletedProduct) {
+      throw CustomError.badRequest('No se pudo desactivar el producto.');
+    }
 
-        return await this.productRepository.deleteById( id );
-    };
-};
+    return deletedProduct;
+  }
+}

@@ -1,104 +1,102 @@
-import type { Request, Response } from "express";
-import type { UserRepository } from "../../domain/index.js";
-import { DeleteUser, GetUser, GetUsers, RegisterUser, UpdateUser, RegisterUserDto, UpdateUserDto, LoginUser } from "../../application/index.js";
-import { LoginUserDto } from "../../application/dtos/login-user.dto.js";
-import { CustomError } from "../../../../shared/domain/errors/custom-error.js";
-import { OrderRepository } from "../../../orders/domain/index.js";
-
-
+import type { Request, Response } from 'express';
+import type { UserRepository } from '../../domain/index.js';
+import {
+  DeleteUser,
+  GetUser,
+  GetUsers,
+  RegisterUser,
+  UpdateUser,
+  RegisterUserDto,
+  UpdateUserDto,
+  LoginUser,
+} from '../../application/index.js';
+import { LoginUserDto } from '../../application/dtos/login-user.dto.js';
+import { CustomError } from '../../../../shared/domain/errors/custom-error.js';
+import { OrderRepository } from '../../../orders/domain/index.js';
 
 export class UsersController {
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly orderRepository: OrderRepository,
+  ) {}
 
-    constructor(
-        private readonly userRepository: UserRepository,
-        private readonly orderRepository: OrderRepository
-    ){}
+  public loginUser = async (req: Request, res: Response) => {
+    const [error, loginUserDto] = LoginUserDto.create(req.body);
+    if (error) return res.status(400).json({ error });
 
+    const data = await new LoginUser(this.userRepository).execute(
+      loginUserDto!,
+    );
+    return res.json(data);
+  };
 
+  public getUsers = async (req: Request, res: Response) => {
+    const users = await new GetUsers(this.userRepository).execute();
+    return res.json(users);
+  };
 
-    public loginUser = async ( req: Request, res: Response ) => {
-        
-        const [ error, loginUserDto ] = LoginUserDto.create( req.body );
-        if ( error ) return res.status(400).json({ error });
+  public getUserById = async (req: any, res: Response) => {
+    const id = req.params.id as string;
 
-        const data = await new LoginUser( this.userRepository ).execute( loginUserDto! );
-        return res.json( data );
+    //console.log(req.userTokenData);
+    const { id: tokenUserId } = req.userTokenData;
+    if (id !== tokenUserId) {
+      throw CustomError.forbidden('You cannot see other users profiles.');
     }
 
+    const user = await new GetUser(this.userRepository).execute(id);
+    return res.json(user);
+  };
 
-    public getUsers = async(req: Request, res: Response ) => {
+  public registerUser = async (req: Request, res: Response) => {
+    const [error, registerUserDto] = RegisterUserDto.create(req.body);
+    if (error) return res.status(400).json({ error });
 
-        const users = await new GetUsers( this.userRepository ).execute();
-        return res.json( users );
-        
-    }
-    
-    public getUserById = async(req: any, res: Response ) => {
+    const user = await new RegisterUser(this.userRepository).execute(
+      registerUserDto!,
+    );
+    return res.status(201).json({
+      message: 'El usuario ha sido creado exitosamente.',
+      user: user,
+    });
+  };
 
-        const id = req.params.id as string;
+  public updateUser = async (req: any, res: Response) => {
+    const id = req.params.id as string;
 
-        //console.log(req.userTokenData);
-        const { id: tokenUserId } = req.userTokenData;
-        if ( id !== tokenUserId ) {
-            throw CustomError.forbidden('You cannot see other users profiles.');
-        }
-
-        const user = await new GetUser( this.userRepository ).execute( id );
-        return res.json( user);
-
-    }
-
-    public registerUser = async( req: Request, res: Response ) => {
-
-        const [ error, registerUserDto] = RegisterUserDto.create( req.body );
-        if( error ) return res.status( 400 ).json({ error });
-
-        const user = await new RegisterUser( this.userRepository ).execute( registerUserDto! );
-        return res.status(201).json({
-            message: 'El usuario ha sido creado exitosamente.',
-            user: user
-        });    
-
+    const { id: tokenUserId } = req.userTokenData;
+    if (id !== tokenUserId) {
+      throw CustomError.forbidden(`You cannot modify other people's profiles.`);
     }
 
-    public updateUser = async( req: any, res: Response ) => {
+    const [error, updateUserDto] = UpdateUserDto.create({ ...req.body, id });
+    if (error) return res.status(400).json({ error });
 
-        const id = req.params.id as string;
+    const user = await new UpdateUser(this.userRepository).execute(
+      updateUserDto!,
+    );
+    return res.status(200).json({
+      message: 'El usuario ha sido modificado exitosamente.',
+      user: user,
+    });
+  };
 
-        const { id: tokenUserId } = req.userTokenData; 
-        if ( id !== tokenUserId ) {
-            throw CustomError.forbidden(`You cannot modify other people's profiles.`);
-        }
+  public deleteUser = async (req: any, res: Response) => {
+    const id = req.params.id as string;
 
-        const [error, updateUserDto] = UpdateUserDto.create({ ...req.body, id });
-        if( error ) return res.status( 400 ).json({ error });
-
-        const user = await new UpdateUser( this.userRepository ).execute( updateUserDto! );
-        return res.status(200).json({
-            message: 'El usuario ha sido modificado exitosamente.',
-            user: user
-        });
-
+    const { id: tokenUserId } = req.userTokenData;
+    if (id !== tokenUserId) {
+      throw CustomError.forbidden('You cannot delete other accounts.');
     }
 
-
-    public deleteUser = async( req: any, res: Response ) => {
-
-        const id = req.params.id as string;
-
-        const { id: tokenUserId } = req.userTokenData;
-        if ( id !== tokenUserId ) {
-            throw CustomError.forbidden('You cannot delete other accounts.')
-        }
-
-        //console.log(this.orderRepository);
-        const user = await new DeleteUser( this.userRepository, this.orderRepository ).execute( id );
-        return res.status(200).json({
-            message: 'El usuario ha sido eliminado exitosamente.',
-            user: user
-        });
-
-    }
-    
-
+    //console.log(this.orderRepository);
+    const user = await new DeleteUser(
+      this.userRepository,
+      this.orderRepository,
+    ).execute(id);
+    return res.status(200).json({
+      message: 'El usuario ha sido eliminado exitosamente.',
+      user: user,
+    });
+  };
 }

@@ -1,11 +1,9 @@
-import { OrderRepository } from "../../domain/index.js";
+import { OrderRepository } from '../../domain/index.js';
 
 export class GetUserOrdersService {
-    constructor(
-        private readonly orderRepository: OrderRepository
-    ){};
+  constructor(private readonly orderRepository: OrderRepository) {}
 
-    async execute(userId: string) {
-        return this.orderRepository.getByUserId(userId);
-    };
+  async execute(userId: string) {
+    return this.orderRepository.getAllByUserId(userId);
+  }
 }

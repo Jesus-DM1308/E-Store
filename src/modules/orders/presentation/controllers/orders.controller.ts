@@ -1,113 +1,98 @@
-import type { Request, Response } from "express";
-import { CustomError } from "../../../../shared/domain/index.js";
+import type { Request, Response } from 'express';
+import { CustomError } from '../../../../shared/domain/index.js';
 import {
-    CreateOrderDto,
-    CreateOrderService,
-    DeleteOrderService,
-    GetOrderService,
-    GetOrdersService,
-    GetUserOrdersService,
-    UpdateOrderStatusDto,
-    UpdateOrderStatusService
-} from "../../application/index.js";
-
-type RequestWithUser = Request & {
-    userTokenData?: {
-        id: string;
-        role: string;
-    };
-};
+  CreateOrderDto,
+  CreateOrderService,
+  DeleteOrderService,
+  GetOrderService,
+  GetUserOrdersService,
+  UpdateOrderStatusDto,
+  UpdateOrderStatusService,
+} from '../../application/index.js';
 
 export class OrdersController {
-    constructor(
-        private readonly createOrderService: CreateOrderService,
-        private readonly getOrdersService: GetOrdersService,
-        private readonly getOrderService: GetOrderService,
-        private readonly getUserOrdersService: GetUserOrdersService,
-        private readonly updateOrderStatusService: UpdateOrderStatusService,
-        private readonly deleteOrderService: DeleteOrderService
-    ){};
+  constructor(
+    private readonly createOrderService: CreateOrderService,
+    private readonly getOrderService: GetOrderService,
+    private readonly getUserOrdersService: GetUserOrdersService,
+    private readonly updateOrderStatusService: UpdateOrderStatusService,
+    private readonly deleteOrderService: DeleteOrderService,
+  ) {}
 
-    private getPositiveIntegerId(req: Request): number {
-        const id = Number(req.params.id);
+  private getPositiveIntegerId(req: Request): number {
+    const id = Number(req.params.id);
 
-        if (!Number.isInteger(id) || id <= 0) {
-            throw CustomError.badRequest('Id de la orden no valida');
-        };
+    if (!Number.isInteger(id) || id <= 0) {
+      throw CustomError.badRequest('Id de la orden no valida.');
+    }
 
-        return id;
-    };
+    return id;
+  }
 
-    getAll = async (req: Request, res: Response) => {
-        const orders = await this.getOrdersService.execute();
+  getAll = async (req: Request, res: Response) => {
+    const userId = req.userTokenData?.id;
 
-        return res.status(200).json(orders);
-    };
+    if (!userId) {
+      throw CustomError.unauthorized('Usuario no autenticado');
+    }
 
-    getMine = async (req: RequestWithUser, res: Response) => {
-        const userId = req.userTokenData?.id;
+    const orders = await this.getUserOrdersService.execute(userId);
 
-        if (!userId) {
-            throw CustomError.unauthorized('Usuario no autenticado');
-        };
+    return res.status(200).json(orders);
+  };
 
-        const orders = await this.getUserOrdersService.execute(userId);
+  getById = async (req: Request, res: Response) => {
+    const id = this.getPositiveIntegerId(req);
+    const order = await this.getOrderService.execute(id);
 
-        return res.status(200).json(orders);
-    };
+    const user = req.userTokenData;
+    const canSeeOrder = user?.id === order.userId;
 
-    getById = async (req: RequestWithUser, res: Response) => {
-        const id = this.getPositiveIntegerId(req);
-        const order = await this.getOrderService.execute(id);
+    if (!canSeeOrder) {
+      throw CustomError.forbidden('No puedes ver esta orden.');
+    }
 
-        const user = req.userTokenData;
-        const canSeeOrder = user?.role === 'SELLER' || user?.role === 'ADMIN' || user?.id === order.userId;
+    return res.status(200).json(order);
+  };
 
-        if (!canSeeOrder) {
-            throw CustomError.forbidden('No puedes ver esta orden.');
-        };
+  create = async (req: Request, res: Response) => {
+    const userId = req.userTokenData?.id;
 
-        return res.status(200).json(order);
-    };
+    if (!userId) {
+      throw CustomError.unauthorized('Usuario no autenticado');
+    }
 
-    create = async (req: RequestWithUser, res: Response) => {
-        const userId = req.userTokenData?.id;
+    const dto = CreateOrderDto.create({
+      ...req.body,
+      userId,
+    });
 
-        if (!userId) {
-            throw CustomError.unauthorized('Usuario no autenticado');
-        };
+    const order = await this.createOrderService.execute(dto);
 
-        const dto = CreateOrderDto.create({
-            ...req.body,
-            userId
-        });
+    return res.status(201).json({
+      message: 'La orden ha sido creada exitosamente.',
+      order,
+    });
+  };
 
-        const order = await this.createOrderService.execute(dto);
+  updateStatus = async (req: Request, res: Response) => {
+    const id = this.getPositiveIntegerId(req);
+    const dto = UpdateOrderStatusDto.create(req.body);
+    const order = await this.updateOrderStatusService.execute(id, dto);
 
-        return res.status(201).json({
-            message: 'La orden ha sido creada exitosamente.',
-            order
-        });
-    };
+    return res.status(200).json({
+      message: 'El estado de la orden ha sido actualizado exitosamente.',
+      order,
+    });
+  };
 
-    updateStatus = async (req: Request, res: Response) => {
-        const id = this.getPositiveIntegerId(req);
-        const dto = UpdateOrderStatusDto.create(req.body);
-        const order = await this.updateOrderStatusService.execute(id, dto);
+  deleteById = async (req: Request, res: Response) => {
+    const id = this.getPositiveIntegerId(req);
+    const order = await this.deleteOrderService.execute(id);
 
-        return res.status(200).json({
-            message: 'El estado de la orden ha sido actualizado exitosamente.',
-            order
-        });
-    };
-
-    deleteById = async (req: Request, res: Response) => {
-        const id = this.getPositiveIntegerId(req);
-        const order = await this.deleteOrderService.execute(id);
-
-        return res.status(200).json({
-            message: 'La orden ha sido eliminada exitosamente.',
-            order
-        });
-    };
+    return res.status(200).json({
+      message: 'La orden ha sido eliminada exitosamente.',
+      order,
+    });
+  };
 }

@@ -1,27 +1,29 @@
-import { OrderEntity } from "../../domain/index.js";
+import { OrderEntity } from '../../domain/index.js';
 
 export class OrderMapper {
-    static toEntity(object: { [key: string]: any }): OrderEntity {
-        const {
-            id,
-            status,
-            user_id,
-            total,
-            address,
-            delivery_date,
-            updated_at,
-            created_at
-        } = object;
+  static toEntity(object: { [key: string]: any }): OrderEntity {
+    const {
+      id,
+      statusId,
+      userId,
+      total,
+      address,
+      whoReceive,
+      deliveryDate,
+      updatedAt,
+      createdAt,
+    } = object;
 
-        return new OrderEntity(
-            id,
-            status,
-            user_id,
-            total,
-            address,
-            delivery_date,
-            updated_at,
-            created_at
-        );
-    };
+    return new OrderEntity(
+      id,
+      statusId,
+      userId,
+      total,
+      address,
+      whoReceive,
+      deliveryDate,
+      updatedAt,
+      createdAt,
+    );
+  }
 }

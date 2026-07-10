@@ -1,61 +1,107 @@
-import { CreateProductService, UpdateProductService, DeleteProductService, GetProductService, GetProductsService, CreateProductDto } from '../../application/index.js';
+import {
+  AddProductStockDto,
+  AddProductStockService,
+  CreateProductService,
+  UpdateProductService,
+  DeleteProductService,
+  GetProductService,
+  GetProductsService,
+  CreateProductDto,
+} from '../../application/index.js';
 import { Request, Response } from 'express';
 import { CustomError } from '../../../../shared/domain/index.js';
 
-export class ProductsController{
-    constructor(
-        private readonly createproductService: CreateProductService,
-        private readonly updateProductService: UpdateProductService,
-        private readonly deleteProductService: DeleteProductService,
-        private readonly getProductService: GetProductService,
-        private readonly getProductsService: GetProductsService,
-    ){};
+export class ProductsController {
+  constructor(
+    private readonly createproductService: CreateProductService,
+    private readonly updateProductService: UpdateProductService,
+    private readonly deleteProductService: DeleteProductService,
+    private readonly getProductService: GetProductService,
+    private readonly getProductsService: GetProductsService,
+    private readonly addProductStockService: AddProductStockService,
+  ) {}
 
-    getAll = async ( req: Request, res: Response ) => {
-        const products = await this.getProductsService.execute();
-        res.status(200).json(products);
-    };
+  getAll = async (req: Request, res: Response) => {
+    const products = await this.getProductsService.execute();
+    res.status(200).json(products);
+  };
 
-    getById = async ( req: Request, res: Response ) => {
-        const id  = Number(req.params.id);
-        if( !Number.isInteger( id ) || id <= 0 ){
-            throw CustomError.badRequest('Id del producto no valida')
-        };
-        const product = await this.getProductService.execute( id );
-        res.status(200).json(product);
-    };
+  getById = async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      throw CustomError.badRequest('Id del producto no valida.');
+    }
+    const product = await this.getProductService.execute(id);
+    res.status(200).json(product);
+  };
 
-    create = async ( req: Request, res: Response ) => {
-        const dto = CreateProductDto.create( req.body );
+  create = async (req: Request, res: Response) => {
+    const userId = req.userTokenData?.id;
+    if (!userId) {
+      throw CustomError.unauthorized('Usuario no autenticado');
+    }
 
-        const product = await this.createproductService.execute( dto );
-        res.status(201).json({
-            message: 'El producto ha sido creado exitosamente:',
-            product: product
-        });
-    };
+    const dto = CreateProductDto.create({
+      ...req.body,
+      userId,
+    });
 
-    updateById = async ( req: Request, res: Response ) => {
-        const id  = Number( req.params.id );
-        if( !Number.isInteger( id ) || id <= 0  ){
-            throw CustomError.badRequest('Id del producto no valida')
-        };
-        const product = await this.updateProductService.execute( id, req.body );
-        res.status(200).json({
-            message: 'El producto ha sido modificado exitosamente:',
-            product: product    
-        });
-    };
+    const product = await this.createproductService.execute(dto);
 
-    deleteById = async ( req: Request, res: Response ) => {
-        const id  = Number( req.params.id );
-        if( !Number.isInteger( id ) || id <= 0 ){
-            throw CustomError.badRequest('Id del producto no valida')
-        };
-        const product = await this.deleteProductService.execute( id );
-        res.status( 200 ).json({
-            message: 'El producto ha sido eliminado exitosamente:',
-            product: product
-        });
-    };
-};
+    res.status(201).json({
+      message: 'El producto ha sido creado exitosamente:',
+      product: product,
+    });
+  };
+
+  updateById = async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      throw CustomError.badRequest('Id del producto no valida');
+    }
+    const product = await this.updateProductService.execute(id, req.body);
+    res.status(200).json({
+      message: 'El producto ha sido modificado exitosamente:',
+      product: product,
+    });
+  };
+
+  deleteById = async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      throw CustomError.badRequest('Id del producto no valida');
+    }
+    const product = await this.deleteProductService.execute(id);
+    res.status(200).json({
+      message: 'El producto ha sido desactivado exitosamente:',
+      product: product,
+    });
+  };
+
+  addStock = async (req: Request, res: Response) => {
+    const userId = req.userTokenData?.id;
+
+    if (!userId) {
+      throw CustomError.unauthorized('Usuario no autenticado');
+    }
+
+    const productId = Number(req.params.id);
+
+    if (!Number.isInteger(productId) || productId <= 0) {
+      throw CustomError.badRequest('Id del producto no valida');
+    }
+
+    const dto = AddProductStockDto.create({
+      ...req.body,
+      productId,
+      userId,
+    });
+
+    const sellerProduct = await this.addProductStockService.execute(dto);
+
+    res.status(200).json({
+      message: 'El stock del producto ha sido registrado exitosamente.',
+      sellerProduct,
+    });
+  };
+}

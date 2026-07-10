@@ -1,56 +1,48 @@
-import { CustomError } from "../../../../shared/domain/errors/custom-error.js";
-import { OrderRepository } from "../../../orders/domain/index.js";
-import type { UserEntity, UserRepository } from "../../domain/index.js";
-
-
+import { CustomError } from '../../../../shared/domain/errors/custom-error.js';
+import {
+  OrderRepository,
+  OrderStatusCode,
+} from '../../../orders/domain/index.js';
+import type { UserEntity, UserRepository } from '../../domain/index.js';
 
 export interface DeleteUserUseCases {
-    execute( id: string ): Promise<UserEntity>;
+  execute(id: string): Promise<UserEntity>;
 }
 
-
-
 export class DeleteUser implements DeleteUserUseCases {
+  constructor(
+    private readonly repository: UserRepository,
+    private readonly orderRepository: OrderRepository,
+  ) {}
 
+  async execute(id: string): Promise<UserEntity> {
+    const userOrders = await this.orderRepository.getAllByUserId(id);
 
-    constructor(
-        private readonly repository: UserRepository,
-        private readonly orderRepository: OrderRepository
-    ){}
+    const terminalStatuses = [
+      OrderStatusCode.CANCELLED,
+      OrderStatusCode.DELIVERED,
+      OrderStatusCode.REFUNDED,
+    ];
 
-    async execute(id: string): Promise<UserEntity> {
+    let hasActiveOrders = false;
 
-        const userOrders = await this.orderRepository.getByUserId(id);
+    for (const order of userOrders) {
+      const statusCode = await this.orderRepository.getStatusCodeById(
+        order.statusId,
+      );
 
-        const statusMap: { [key: number]: string } = {
-            1: 'Pendiente',
-            2: 'Aprobado',
-            3: 'Enviado',
-            4: 'En transito',
-            5: 'Entregado',
-            6: 'Cancelado',
-            7: 'Reembolsado'
-        };
-
-
-        const hasActiveOrders = userOrders.some( order => {
-            const statusText = statusMap[order.statusId]
-            return (
-                statusText !== 'Cancelado' && 
-                statusText !== 'Entregado' && 
-                statusText !== 'Reembolsado'
-            );
-        });
-        
-
-        if( hasActiveOrders ){
-            throw CustomError.badRequest(
-                'No puedes dar de baja tu cuenta porque tienes órdenes activas en proceso de entrega o pago.'
-            )
-        }
-            
-      
-        return this.repository.deleteById( id );
+      if (!statusCode || !terminalStatuses.includes(statusCode)) {
+        hasActiveOrders = true;
+        break;
+      }
     }
 
+    if (hasActiveOrders) {
+      throw CustomError.badRequest(
+        'No puedes dar de baja tu cuenta porque tienes órdenes activas en proceso de entrega o pago.',
+      );
+    }
+
+    return this.repository.deleteById(id);
+  }
 }

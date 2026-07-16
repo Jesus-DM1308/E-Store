@@ -22,6 +22,7 @@ export class PdfService {
         currency: 'MXN' 
         });
     }
+    
 
     static generateSalesReport(report: SalesReportEntity): Promise<Buffer> {
         return new Promise((resolve, reject) => {

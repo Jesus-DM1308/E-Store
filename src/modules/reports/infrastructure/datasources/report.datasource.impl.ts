@@ -1,32 +1,35 @@
 import { and, gte, lte, sql, eq, desc } from 'drizzle-orm';
 import { ReportDatasource, SalesReportEntity } from '../../domain/index.js';
-import { orderDetailTable, orderTable, productsTable, usersTable } from '../../../../shared/infrastructure/index.js';
+import { orderDetailTable, ordersTable, productsTable, usersTable, productsUsersTable } from '../../../../shared/infrastructure/index.js';
 import { SalesReportMapper } from '../mappers/sales-report.mapper.js';
-
-
+import { OrderRepository } from '../../../orders/domain/repositories/order.repository.js';
+import { OrderStatusCode } from '../../../orders/domain/constants/order-status.constant.js';
 
 export class ReportDatasourceImpl implements ReportDatasource {
 
-  constructor(private readonly db: any) {}
+  constructor(
+    private readonly db: any, 
+    private readonly orderRepository: OrderRepository
+  ) {}
 
   async getSalesReport(startDate: Date, endDate: Date, sellerId: string): Promise<SalesReportEntity> {
 
-
     const startOfPeriod = new Date(startDate);
     const endOfPeriod = new Date(endDate);
-
     
-    // inicio y fin de las fechasde todo el dia
+    // inicio y fin de las fechas de todo el dia
     startOfPeriod.setUTCHours(0, 0, 0, 0);
     endOfPeriod.setUTCHours(23, 59, 59, 999);
 
+    // se obtienen los ids del estado entregado y rembolsado
+    const successfulId = await this.orderRepository.getStatusIdByCode(OrderStatusCode.DELIVERED);
+    const refundedId = await this.orderRepository.getStatusIdByCode(OrderStatusCode.REFUNDED);
 
-    // ids del status en la basde de datos( en si podrian cambiar si se cambian los status)
-    const STATUS_SUCCESSFUL = 5; 
-    const STATUS_REFUNDED = 7;   
+    if (!successfulId || !refundedId) {
+        throw new Error('Los estados no están configurados en la base de datos');
+    }
 
-    
-    // bsucar nombre dle vendedor
+    // buscar nombre del vendedor
     const userResult = await this.db
       .select({ name: usersTable.name })
       .from(usersTable)
@@ -35,41 +38,49 @@ export class ReportDatasourceImpl implements ReportDatasource {
     
     const sellerName = userResult[0]?.name ?? 'Vendedor no encontrado';
 
-    
     // datos principales del reporte
-    const [metrics] = await this.db
+    const metricsResult = await this.db
       .select({
-        totalEarnings: sql`COALESCE(SUM(CASE WHEN ${orderTable.status} = ${STATUS_SUCCESSFUL} THEN ${orderTable.total} ELSE 0 END), 0)`.mapWith(Number),
-        averageTicket: sql`COALESCE(AVG(CASE WHEN ${orderTable.status} = ${STATUS_SUCCESSFUL} THEN ${orderTable.total} ELSE NULL END), 0)`.mapWith(Number),
-        successfulOrders: sql`COUNT(CASE WHEN ${orderTable.status} = ${STATUS_SUCCESSFUL} THEN 1 END)`.mapWith(Number),
-        refundedOrders: sql`COUNT(CASE WHEN ${orderTable.status} = ${STATUS_REFUNDED} THEN 1 END)`.mapWith(Number)
+        totalEarnings: sql`COALESCE(SUM(CASE WHEN ${ordersTable.statusId} = ${successfulId} THEN ${orderDetailTable.quantity} * ${orderDetailTable.unitPrice} ELSE 0 END), 0)`.mapWith(Number),
+        successfulOrders: sql`COALESCE(COUNT(DISTINCT CASE WHEN ${ordersTable.statusId} = ${successfulId} THEN ${ordersTable.id} END), 0)`.mapWith(Number),
+        refundedOrders: sql`COALESCE(COUNT(DISTINCT CASE WHEN ${ordersTable.statusId} = ${refundedId} THEN ${ordersTable.id} END), 0)`.mapWith(Number)
       })
-      .from(orderTable)
+      .from(orderDetailTable)
+      .innerJoin(ordersTable, eq(orderDetailTable.orderId, ordersTable.id))
+      .innerJoin(productsUsersTable, eq(orderDetailTable.productUserId, productsUsersTable.id))
       .where(
         and(
-          eq(orderTable.user_id, sellerId),
-          gte(orderTable.created_at, startOfPeriod),
-          lte(orderTable.created_at, endOfPeriod)
+          eq(productsUsersTable.userId, sellerId),
+          gte(ordersTable.createdAt, startOfPeriod),
+          lte(ordersTable.createdAt, endOfPeriod)
         )
       );
 
+    const metrics = metricsResult[0] || { totalEarnings: 0, successfulOrders: 0, refundedOrders: 0 };
+
+    // calcular el promedio vendido
+    const averageTicket = metrics.successfulOrders > 0 
+      ? Number((metrics.totalEarnings / metrics.successfulOrders).toFixed(2)) 
+      : 0;
     
     // por default lo pongo como Ninguno
     let topSellingProduct = 'Ninguno';
+    
     // buscar el producto mas vendido
     if (metrics.successfulOrders > 0) {
       try {
         const topProductResult = await this.db
           .select({ productName: productsTable.name })
           .from(orderDetailTable)
-          .innerJoin(orderTable, eq(orderDetailTable.order_id, orderTable.id)) 
-          .innerJoin(productsTable, eq(orderDetailTable.product_id, productsTable.id)) 
+          .innerJoin(ordersTable, eq(orderDetailTable.orderId, ordersTable.id)) 
+          .innerJoin(productsUsersTable, eq(orderDetailTable.productUserId, productsUsersTable.id))
+          .innerJoin(productsTable, eq(productsUsersTable.productId, productsTable.id))
           .where(
             and(
-              eq(orderTable.user_id, sellerId), 
-              eq(orderTable.status, STATUS_SUCCESSFUL), 
-              gte(orderTable.created_at, startOfPeriod),
-              lte(orderTable.created_at, endOfPeriod)
+              eq(productsUsersTable.userId, sellerId),
+              eq(ordersTable.statusId, successfulId), 
+              gte(ordersTable.createdAt, startOfPeriod),
+              lte(ordersTable.createdAt, endOfPeriod)
             )
           )
           .groupBy(productsTable.name)
@@ -84,19 +95,16 @@ export class ReportDatasourceImpl implements ReportDatasource {
       }
     }
 
-
     // pasar los datos a la entidad usando el mapper
     return SalesReportMapper.toReportEntity({
       startDate: startOfPeriod,
       endDate: endOfPeriod,
       sellerName,
       totalEarnings: metrics.totalEarnings,
-      averageTicket: metrics.averageTicket,
+      averageTicket,
       successfulOrders: metrics.successfulOrders,
       refundedOrders: metrics.refundedOrders,
       topSellingProduct
-    })
-
-
+    });
   }
 }

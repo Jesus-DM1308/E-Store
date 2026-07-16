@@ -7,4 +7,4 @@ export * from './controllers/products.controller.js';
 export * from './routes/routes.js';
 
 //Dependencies
-export * from './dependencies/dependencies.js' 
+export * from './dependencies/dependencies.js';

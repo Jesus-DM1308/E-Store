@@ -1,85 +1,82 @@
-import { CustomError } from "../../../../shared/domain/index.js";
+import { CustomError } from '../../../../shared/domain/index.js';
 
 interface CreateOrderDetailProps {
-    productId: number;
-    quantity: number;
+  productUserId: number;
+  quantity: number;
 }
 
 interface CreateOrderProps {
-    userId: string;
-    address: unknown;
-    deliveryDate?: Date;
-    details: CreateOrderDetailProps[];
+  userId: string;
+  address: unknown;
+  whoReceive: string;
+  details: CreateOrderDetailProps[];
 }
 
 export class CreateOrderDto {
-    private constructor(
-        public readonly props: CreateOrderProps
-    ){};
+  private constructor(public readonly props: CreateOrderProps) {}
 
-    static create(object: { [key: string]: any }): CreateOrderDto {
-        const {
-            userId,
-            address,
-            delivery_date,
-            details
-        } = object;
+  static create(object: { [key: string]: any }): CreateOrderDto {
+    const { userId, address, whoReceive, details } = object;
 
-        if (!userId) {
-            throw CustomError.badRequest('User id is required');
-        };
+    if (!userId) {
+      throw CustomError.badRequest('El id del usuario es requerido.');
+    }
 
-        if (address === undefined || address === null) {
-            throw CustomError.badRequest('Address is required');
-        };
+    if (address === undefined || address === null) {
+      throw CustomError.badRequest('La direccion es requerida.');
+    }
 
-        if (!Array.isArray(details) || details.length === 0) {
-            throw CustomError.badRequest('Order details are required');
-        };
+    if (!whoReceive?.trim()) {
+      throw CustomError.badRequest('El nombre de quien recibe es requerido.');
+    }
 
-        const parsedDetails = details.map((detail, index) => {
-            const productId = Number(detail.product_id);
-            const quantity = Number(detail.quantity);
+    if (!Array.isArray(details) || details.length === 0) {
+      throw CustomError.badRequest('Los detalles de la orden son requeridos.');
+    }
 
-            if (!Number.isInteger(productId) || productId <= 0) {
-                throw CustomError.badRequest(`Invalid product id at detail ${index + 1}`);
-            };
+    const parsedDetails = details.map((detail, index) => {
+      const productUserId = Number(detail.productUserId);
+      const quantity = Number(detail.quantity);
 
-            if (!Number.isInteger(quantity) || quantity <= 0) {
-                throw CustomError.badRequest(`Invalid quantity at detail ${index + 1}`);
-            };
+      if (!Number.isInteger(productUserId) || productUserId <= 0) {
+        throw CustomError.badRequest(
+          `Id del producto del vendedor no valida en el detalle ${index + 1}.`,
+        );
+      }
 
-            return {
-                productId,
-                quantity
-            };
-        });
+      if (!Number.isInteger(quantity) || quantity <= 0) {
+        throw CustomError.badRequest(
+          `Cantidad no valida en el detalle ${index + 1}.`,
+        );
+      }
 
-        const detailsByProduct = parsedDetails.reduce<CreateOrderDetailProps[]>((acc, detail) => {
-            const existingDetail = acc.find(item => item.productId === detail.productId);
+      return {
+        productUserId,
+        quantity,
+      };
+    });
 
-            if (existingDetail) {
-                existingDetail.quantity += detail.quantity;
-                return acc;
-            };
+    const detailsBySellerProduct = parsedDetails.reduce<
+      CreateOrderDetailProps[]
+    >((items, detail) => {
+      const existingDetail = items.find(
+        (item) => item.productUserId === detail.productUserId,
+      );
 
-            acc.push({ ...detail });
-            return acc;
-        }, []);
+      if (existingDetail) {
+        existingDetail.quantity += detail.quantity;
+        return items;
+      }
 
-        let deliveryDate: Date | undefined;
-        if (delivery_date !== undefined) {
-            deliveryDate = new Date(delivery_date);
-            if (deliveryDate.toString() === 'Invalid Date') {
-                throw CustomError.badRequest('Delivery date must be a valid date');
-            };
-        };
+      items.push({ ...detail });
+      return items;
+    }, []);
 
-        return new CreateOrderDto({
-            userId,
-            address,
-            ...(deliveryDate !== undefined ? { deliveryDate } : {}),
-            details: detailsByProduct
-        });
-    };
+    return new CreateOrderDto({
+      userId,
+      address,
+      whoReceive,
+      details: detailsBySellerProduct,
+    });
+  }
 }

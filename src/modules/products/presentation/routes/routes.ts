@@ -4,32 +4,44 @@ import { catchAsync } from '../../../../shared/infrastructure/index.js';
 import { AuthMiddleware } from '../../../../shared/presentation/middlewares/auth.middleware.js';
 
 export class ProductsRoutes {
-  constructor(){};
+  constructor() {}
 
   static get routes(): Router {
-
     const router = Router();
 
     const seller = 'SELLER';
 
-    router.get('/', catchAsync( productsController.getAll ) );
-    router.get('/:id', catchAsync( productsController.getById ) );
+    router.get('/', catchAsync(productsController.getAll));
+    router.get('/:id', catchAsync(productsController.getById));
 
-    router.post('/',
+    router.post(
+      '/',
       catchAsync(AuthMiddleware.validateJWT),
       catchAsync(AuthMiddleware.validateRoles(seller)),
-      catchAsync( productsController.create ) );
+      catchAsync(productsController.create),
+    );
 
-    router.put('/:id',
+    router.post(
+      '/:id/stock',
       catchAsync(AuthMiddleware.validateJWT),
       catchAsync(AuthMiddleware.validateRoles(seller)),
-      catchAsync( productsController.updateById ) );
+      catchAsync(productsController.addStock),
+    );
 
-    router.delete('/:id',
+    router.put(
+      '/:id',
       catchAsync(AuthMiddleware.validateJWT),
       catchAsync(AuthMiddleware.validateRoles(seller)),
-      catchAsync( productsController.deleteById ) );
+      catchAsync(productsController.updateById),
+    );
+
+    router.delete(
+      '/:id',
+      catchAsync(AuthMiddleware.validateJWT),
+      catchAsync(AuthMiddleware.validateRoles(seller)),
+      catchAsync(productsController.deleteById),
+    );
 
     return router;
-  };
-};
+  }
+}

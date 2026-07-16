@@ -4,7 +4,7 @@ import { GetSalesReport } from '../../application/index.js';
 import { AuthMiddleware } from '../../../users/presentation/index.js';
 import { catchAsync } from '../../../../shared/infrastructure/index.js';
 import { ReportController } from '../index.js';
-
+import { DrizzleOrderDatasource, OrderRepositoryImpl } from '../../../orders/infrastructure/index.js';
 
 
 
@@ -14,11 +14,12 @@ export class ReportRoutes {
 
 
     const router = Router();
-    
     const sellerRole = 'SELLER';
 
+    const orderDatasource = new DrizzleOrderDatasource();
+    const orderRepository = new OrderRepositoryImpl( orderDatasource );
 
-    const datasource = new ReportDatasourceImpl( db );
+    const datasource = new ReportDatasourceImpl( db, orderRepository );
     const repository = new ReportRepositoryImpl( datasource );
     const useCase = new GetSalesReport( repository );
     const controller = new ReportController( useCase );

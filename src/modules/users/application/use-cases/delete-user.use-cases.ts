@@ -1,6 +1,7 @@
 import { CustomError } from "../../../../shared/domain/errors/custom-error.js";
 import { OrderRepository } from "../../../orders/domain/index.js";
 import type { UserEntity, UserRepository } from "../../domain/index.js";
+import { OrderStatusCode } from "../../../orders/domain/index.js";
 
 
 
@@ -20,28 +21,27 @@ export class DeleteUser implements DeleteUserUseCases {
 
     async execute(id: string): Promise<UserEntity> {
 
-        const userOrders = await this.orderRepository.getByUserId(id);
+        const userOrders = await this.orderRepository.getAllByUserId(id);
 
-        const statusMap: { [key: number]: string } = {
-            1: 'Pendiente',
-            2: 'Aprobado',
-            3: 'Enviado',
-            4: 'En transito',
-            5: 'Entregado',
-            6: 'Cancelado',
-            7: 'Reembolsado'
-        };
+        if (userOrders.length === 0) {
+            return this.repository.deleteById(id);
+        }
+
+        const cancelledId = await this.orderRepository.getStatusIdByCode(OrderStatusCode.CANCELLED);
+        const deliveredId = await this.orderRepository.getStatusIdByCode(OrderStatusCode.DELIVERED);
+        const refundedId = await this.orderRepository.getStatusIdByCode(OrderStatusCode.REFUNDED);
 
 
-        const hasActiveOrders = userOrders.some( order => {
-            const statusText = statusMap[order.statusId]
-            return (
-                statusText !== 'Cancelado' && 
-                statusText !== 'Entregado' && 
-                statusText !== 'Reembolsado'
-            );
-        });
+        if (!cancelledId || !deliveredId || !refundedId) {
+            throw CustomError.internalServer();
+        }
+
         
+        const inactiveStatusIds = [cancelledId, deliveredId, refundedId];
+
+        const hasActiveOrders = userOrders.some(order => 
+            !inactiveStatusIds.includes(order.statusId)
+        );
 
         if( hasActiveOrders ){
             throw CustomError.badRequest(

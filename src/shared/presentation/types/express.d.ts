@@ -14,5 +14,5 @@ declare global {
 
 }
 
-// etse export vacio convierte el archivo en un modulo
+// este export vacio convierte el archivo en un modulo
 export {}

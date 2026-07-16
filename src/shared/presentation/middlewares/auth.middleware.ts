@@ -4,8 +4,6 @@ import { CustomError } from '../../domain/errors/custom-error.js';
 
 
 
-
-
 export class AuthMiddleware {
 
   static validateJWT = async ( req: Request, res: Response, next: NextFunction ) => {
@@ -22,22 +20,23 @@ export class AuthMiddleware {
     const token = authorization.split(' ').pop() || '';
     const payload = await JwtAdapter.validateToken<{ id: string, role: string }>(token);
     if ( !payload ) {
-      throw CustomError.unauthorized('Token invalido');
+      throw CustomError.unauthorized('Invalid token');
     };
     req.userTokenData = payload; 
 
     next();
   };
+
   static validateRoles = ( ...roles: string[] ) => {
     return (req: Request, res: Response, next: NextFunction) => {
       const user = req.userTokenData;
       if( !user ){
-        throw CustomError.unauthorized('Usuario no autenticado')
+        throw CustomError.unauthorized('User not authenticated')
       };
       if( !roles.includes( user.role ) ){
-        throw CustomError.forbidden('No tienes permisos para acceder a esta ruta');
+        throw CustomError.forbidden('You dont have permissions to access this route');
       };
       next();
     };
   };
-};
+}

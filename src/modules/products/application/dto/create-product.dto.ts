@@ -1,70 +1,45 @@
-import { CustomError } from "../../../../shared/domain/index.js";
+import { CustomError } from '../../../../shared/domain/index.js';
+import { LENGTH_LIMIT } from '../../domain/constants/length-limit.constant.js';
 
-interface CreateProductProps{
-    name: string,
-    description?: string,
-    price: number,
-    stock: number,
-    img?: string
-};
+interface CreateProductProps {
+  name: string;
+  brand: string;
+  description?: string;
+  image?: string;
+}
 
-export class CreateProductDto{
-    private constructor(
-        public readonly props: CreateProductProps
-    ){};
-    
-    static create( object: {[key: string]: any}): CreateProductDto{
-        const {
-            name,
-            description,
-            price,
-            stock,
-            img
-        } = object;
+export class CreateProductDto {
+  private constructor(public readonly props: CreateProductProps) {}
 
-        //Existence of attributes requires
-        if(!name?.trim()){
-            throw CustomError.badRequest('Nombre del producto es requerido');
-        };
-        if(price === undefined){
-            throw CustomError.badRequest('Precio del producto es requerido');
-        };
-        if(stock === undefined){
-            throw CustomError.badRequest('Stock del producto es requerido');
-        };  
+  static create(object: { [key: string]: any }): CreateProductDto {
+    const { name, description, brand, image } = object;
 
-        //Parsings
-        const parsedPrice = Number(price);
-        const parsedStock = Number(stock);
+    //Existence of requires attributes
+    if (!name?.trim()) {
+      throw CustomError.badRequest('El nombre del producto es requerido.');
+    }
 
-        //Validations
-        if(isNaN(parsedPrice)){
-            throw CustomError.badRequest('Precio del producto debe ser un numero');
-        };
+    if (!brand?.trim()) {
+      throw CustomError.badRequest('La marca del producto es requerida.');
+    }
 
-        if(isNaN(parsedStock)){
-            throw CustomError.badRequest('Stock del producto debe ser un numero');
-        };
+    if (description && description.length > LENGTH_LIMIT) {
+      throw CustomError.badRequest(
+        `La descripcion del producto no puede ser mayor a ${LENGTH_LIMIT} caracteres.`,
+      );
+    }
 
-        if(parsedPrice <= 0){
-            throw CustomError.badRequest('Precio del producto debe ser mayor a 0');
-        };
-        
-        if(parsedStock < 0){
-            throw CustomError.badRequest('Stock del producto no puede ser menor a 0');
-        };
+    if (brand.length > LENGTH_LIMIT) {
+      throw CustomError.badRequest(
+        `La marca del producto no puede ser mayor a ${LENGTH_LIMIT} caracteres.`,
+      );
+    }
 
-        if(description !== undefined && description.length > 255){
-            throw CustomError.badRequest('Descripcion del producto no puede ser mayor a 255 caracteres');
-        };
-
-        return new CreateProductDto({
-            name,
-            description,
-            price: parsedPrice,
-            stock: parsedStock,
-            img
-        });
-    };
-    
-};
+    return new CreateProductDto({
+      name,
+      description,
+      brand,
+      image,
+    });
+  }
+}

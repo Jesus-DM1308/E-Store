@@ -1,66 +1,43 @@
-import {
-  DrizzleProductDataSource
-} from "../../infrastructure/index.js";
+import { DrizzleProductDataSource } from '../../infrastructure/index.js';
 
-import {
-  ProductRepositoryImpl
-} from "../../infrastructure/index.js";
+import { ProductRepositoryImpl } from '../../infrastructure/index.js';
 
 import {
   CreateProductService,
   UpdateProductService,
   DeleteProductService,
   GetProductService,
-  GetProductsService
-} from "../../application/index.js";
+  GetProductsService,
+  AddProductStockService,
+} from '../../application/index.js';
 
-import {
-  ProductsController
-} from "../index.js"
-
+import { ProductsController } from '../index.js';
 
 // datasource
-const datasource =
-  new DrizzleProductDataSource();
+const datasource = new DrizzleProductDataSource();
 
 // repository
-const repository =
-  new ProductRepositoryImpl(
-    datasource
-  );
+const repository = new ProductRepositoryImpl(datasource);
 
 // services
-const createProductService =
-  new CreateProductService(
-    repository
-  );
+const createProductService = new CreateProductService(repository);
 
-const updateProductService =
-  new UpdateProductService(
-    repository
-  );
+const updateProductService = new UpdateProductService(repository);
 
-const deleteProductService =
-  new DeleteProductService(
-    repository
-  );
+const deleteProductService = new DeleteProductService(repository);
 
-const getProductService =
-  new GetProductService(
-    repository
-  );
+const getProductService = new GetProductService(repository);
 
-const getProductsService =
-  new GetProductsService(
-    repository
-  );
+const getProductsService = new GetProductsService(repository);
+
+const addProductStockService = new AddProductStockService(repository);
 
 // controller
-export const productsController =
-  new ProductsController(
-    createProductService,
-    updateProductService,
-    deleteProductService,
-    getProductService,
-    getProductsService
-  );
+export const productsController = new ProductsController(
+  createProductService,
+  updateProductService,
+  deleteProductService,
+  getProductService,
+  getProductsService,
+  addProductStockService,
+);

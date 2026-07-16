@@ -12,11 +12,12 @@ export class AppRoutes {
 
     const router = Router();
     
-    router.use('/products', ProductsRoutes.routes );
-    router.use('/users', UsersRoutes.routes );
-    router.use('/orders', OrdersRoutes.routes );
+    router.use('/products', ProductsRoutes.routes);
+    router.use('/users', UsersRoutes.routes);
+    router.use('/orders', OrdersRoutes.routes);
     router.use('/reports', ReportRoutes.routes(db));
     
     return router;
-  };
-};
+    
+  }
+}

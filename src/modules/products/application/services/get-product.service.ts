@@ -1,19 +1,21 @@
-import { CustomError } from "../../../../shared/domain/index.js";
-import { ProductRepository } from "../../domain/index.js";
+import { CustomError } from '../../../../shared/domain/index.js';
+import { ProductRepository } from '../../domain/index.js';
 
-export class GetProductService{
+export class GetProductService {
+  constructor(private readonly productRepository: ProductRepository) {}
 
-    constructor(
-        private readonly productRepository: ProductRepository
-    ){};
+  async execute(id: number) {
+    // Verifica si el id del producto existe antes de extraerlo de la base de datos
+    const product = await this.productRepository.getById(id);
+    if (!product) {
+      throw CustomError.notFound('El id del producto ingresado no existe.');
+    }
 
-    async execute(id: number){
+    const offers = await this.productRepository.getOffersByProductId(id);
 
-        const product = await this.productRepository.getById( id );
-        if( !product ){
-            throw CustomError.notFound('La id del producto ingresado no existe.')
-        };
-
-        return product;
+    return {
+      ...product,
+      offers,
     };
-};
+  }
+}

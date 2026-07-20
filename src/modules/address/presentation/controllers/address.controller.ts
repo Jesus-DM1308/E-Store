@@ -14,8 +14,9 @@ export class AddressController {
     ) {}
 
     
-    getAll = async (req: Request, res: Response) => {
-        const addresses = await this.AddressRepository.getAll();
+    getAll = async (req: any, res: Response) => {
+        const user_id = req.userTokenData.id;
+        const addresses = await this.AddressRepository.getAllByUserId(user_id);
         res.status(200).json(addresses);
     };
 
@@ -24,6 +25,10 @@ export class AddressController {
         const id = Number(req.params.id);
         if(isNaN(id)) throw CustomError.badRequest('Id de Address no válida');
         const address = await this.getAddressService.execute(id);
+
+        if(address.user_id !== req.userTokenData.id)
+            throw CustomError.forbidden('No tienes acceso a esta dirección');
+
         res.status(200).json(address);
     };
 

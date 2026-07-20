@@ -16,6 +16,14 @@ export class DrizzleAddressDataSource extends AddressDatasource {
         return AddressMapper.toEntity(address);
     };
 
+    async getAllByUserId( user_id: string ): Promise<AddressEntity[]> {
+        const addresses = await db
+            .select()
+            .from(addressTable)
+            .where(eq(addressTable.user_id, user_id));
+        return addresses.map(AddressMapper.toEntity);
+    };
+
     async getAll( ): Promise<AddressEntity[]> {
         const allAddress = await db.select()
                                     .from( addressTable );

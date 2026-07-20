@@ -2,6 +2,7 @@ import {
   CreateOrderService,
   DeleteOrderService,
   GetOrderService,
+  GetSellerOrdersService,
   GetUserOrdersService,
   UpdateOrderStatusService,
 } from '../../application/index.js';
@@ -21,6 +22,8 @@ const getOrderService = new GetOrderService(repository);
 
 const getUserOrdersService = new GetUserOrdersService(repository);
 
+const getSellerOrdersService = new GetSellerOrdersService(repository);
+
 const updateOrderStatusService = new UpdateOrderStatusService(repository);
 
 const deleteOrderService = new DeleteOrderService(repository);
@@ -29,6 +32,7 @@ export const ordersController = new OrdersController(
   createOrderService,
   getOrderService,
   getUserOrdersService,
+  getSellerOrdersService,
   updateOrderStatusService,
   deleteOrderService,
 );

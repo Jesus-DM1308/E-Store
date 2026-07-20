@@ -6,5 +6,6 @@ export * from './dto/update-order-status.dto.js';
 export * from './services/create-order.service.js';
 export * from './services/get-order.service.js';
 export * from './services/get-user-orders.service.js';
+export * from './services/get-seller-orders.service.js';
 export * from './services/update-order-status.service.js';
 export * from './services/delete-order.service.js';

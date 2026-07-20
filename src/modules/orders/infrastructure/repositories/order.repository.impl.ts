@@ -1,10 +1,11 @@
-import { CreateOrderDto } from '../../application/index.js';
+ import { CreateOrderDto } from '../../application/index.js';
 import {
   OrderDatasource,
   OrderDetailEntity,
   OrderEntity,
   OrderRepository,
   OrderStatusCode,
+  SellerOrdersByStatus,
 } from '../../domain/index.js';
 
 export class OrderRepositoryImpl implements OrderRepository {
@@ -19,6 +20,10 @@ export class OrderRepositoryImpl implements OrderRepository {
 
   async getAllByUserId(userId: string): Promise<OrderEntity[]> {
     return this.orderDatasource.getAllByUserId(userId);
+  }
+
+  async getSellerOrdersByStatus(sellerId: string): Promise<SellerOrdersByStatus> {
+    return this.orderDatasource.getSellerOrdersByStatus(sellerId);
   }
 
   async getDetailsByOrderId(orderId: number): Promise<OrderDetailEntity[]> {

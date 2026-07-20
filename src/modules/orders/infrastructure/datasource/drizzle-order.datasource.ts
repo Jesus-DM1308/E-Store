@@ -6,6 +6,7 @@ import {
   productsTable,
   productsUsersTable,
   statusOrderTable,
+  usersTable,
 } from '../../../../shared/infrastructure/index.js';
 import { CustomError } from '../../../../shared/domain/index.js';
 import { CreateOrderDto } from '../../application/index.js';
@@ -14,6 +15,8 @@ import {
   OrderDetailEntity,
   OrderEntity,
   OrderStatusCode,
+  SellerOrdersByStatus,
+  SellerOrderSummary,
 } from '../../domain/index.js';
 import { OrderMapper } from '../mappers/order.mapper.js';
 import { OrderDetailMapper } from '../mappers/order-detail.mapper.js';
@@ -41,6 +44,132 @@ export class DrizzleOrderDatasource extends OrderDatasource {
       .where(eq(ordersTable.userId, userId));
 
     return orders.map((order) => OrderMapper.toEntity(order));
+  }
+
+  async getSellerOrdersByStatus(
+    sellerId: string,
+  ): Promise<SellerOrdersByStatus> {
+    const rows = await db
+      .select({
+        orderId: ordersTable.id,
+        statusId: ordersTable.statusId,
+        statusCode: statusOrderTable.code,
+        total: ordersTable.total,
+        address: ordersTable.address,
+        whoReceive: ordersTable.whoReceive,
+        userName: usersTable.name,
+        userLastName: usersTable.lastName,
+        userCel: usersTable.cel,
+        detailId: orderDetailTable.id,
+        productUserId: orderDetailTable.productUserId,
+        productId: productsUsersTable.productId,
+        productName: productsTable.name,
+        quantity: orderDetailTable.quantity,
+        unitPrice: orderDetailTable.unitPrice,
+      })
+      .from(orderDetailTable)
+      .innerJoin(ordersTable, eq(orderDetailTable.orderId, ordersTable.id))
+      .innerJoin(usersTable, eq(ordersTable.userId, usersTable.id))
+      .innerJoin(
+        statusOrderTable,
+        eq(ordersTable.statusId, statusOrderTable.id),
+      )
+      .innerJoin(
+        productsUsersTable,
+        eq(orderDetailTable.productUserId, productsUsersTable.id),
+      )
+      .innerJoin(
+        productsTable,
+        eq(productsUsersTable.productId, productsTable.id),
+      )
+      .where(
+        eq(productsUsersTable.userId, sellerId),
+      );
+
+    const ordersById = new Map<number, SellerOrderSummary>();
+
+    for (const row of rows) {
+      const statusCode = row.statusCode as OrderStatusCode;
+      const order = ordersById.get(row.orderId);
+
+      if (order) {
+        order.details.push({
+          id: row.detailId,
+          productUserId: row.productUserId,
+          productId: row.productId,
+          productName: row.productName,
+          quantity: row.quantity,
+          unitPrice: row.unitPrice,
+        });
+        continue;
+      }
+
+      ordersById.set(row.orderId, {
+        id: row.orderId,
+        statusId: row.statusId,
+        statusCode,
+        user: {
+          name: row.userName,
+          lastName: row.userLastName,
+          cel: row.userCel,
+        },
+        total: row.total,
+        address: row.address,
+        whoReceive: row.whoReceive,
+        details: [
+          {
+            id: row.detailId,
+            productUserId: row.productUserId,
+            productId: row.productId,
+            productName: row.productName,
+            quantity: row.quantity,
+            unitPrice: row.unitPrice,
+          },
+        ],
+      });
+    }
+
+    const sellerOrders: SellerOrdersByStatus = {
+      pending: [],
+      approved: [],
+      sending: [],
+      inTransit: [],
+      delivered: [],
+      cancelled: [],
+      refunded: [],
+    };
+
+    for (const order of ordersById.values()) {
+      if (order.statusCode === OrderStatusCode.PENDING) {
+        sellerOrders.pending.push(order);
+      }
+
+      if (order.statusCode === OrderStatusCode.APPROVED) {
+        sellerOrders.approved.push(order);
+      }
+
+      if (order.statusCode === OrderStatusCode.SENDING) {
+        sellerOrders.sending.push(order);
+      }
+
+      if (order.statusCode === OrderStatusCode.IN_TRANSIT) {
+        sellerOrders.inTransit.push(order);
+      }
+
+      if (order.statusCode === OrderStatusCode.DELIVERED) {
+        sellerOrders.delivered.push(order);
+      }
+
+      if (order.statusCode === OrderStatusCode.CANCELLED) {
+        sellerOrders.cancelled.push(order);
+      }
+
+      if (order.statusCode === OrderStatusCode.REFUNDED) {
+        sellerOrders.refunded.push(order);
+      }
+    }
+
+    return sellerOrders;
   }
 
   async getAll(): Promise<OrderEntity[]> {

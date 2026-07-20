@@ -8,12 +8,20 @@ export class OrdersRoutes {
     const router = Router();
 
     const CLIENT = 'CLIENT';
+    const SELLER = 'SELLER';
 
     router.get(
       '/',
       catchAsync(AuthMiddleware.validateJWT),
       catchAsync(AuthMiddleware.validateRoles(CLIENT)),
       catchAsync(ordersController.getAll),
+    );
+
+    router.get(
+      '/seller',
+      catchAsync(AuthMiddleware.validateJWT),
+      catchAsync(AuthMiddleware.validateRoles(SELLER)),
+      catchAsync(ordersController.getSellerOrders),
     );
 
     router.get(

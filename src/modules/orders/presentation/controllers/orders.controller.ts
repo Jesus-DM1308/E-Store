@@ -5,6 +5,7 @@ import {
   CreateOrderService,
   DeleteOrderService,
   GetOrderService,
+  GetSellerOrdersService,
   GetUserOrdersService,
   UpdateOrderStatusDto,
   UpdateOrderStatusService,
@@ -15,6 +16,7 @@ export class OrdersController {
     private readonly createOrderService: CreateOrderService,
     private readonly getOrderService: GetOrderService,
     private readonly getUserOrdersService: GetUserOrdersService,
+    private readonly getSellerOrdersService: GetSellerOrdersService,
     private readonly updateOrderStatusService: UpdateOrderStatusService,
     private readonly deleteOrderService: DeleteOrderService,
   ) {}
@@ -37,6 +39,18 @@ export class OrdersController {
     }
 
     const orders = await this.getUserOrdersService.execute(userId);
+
+    return res.status(200).json(orders);
+  };
+
+  getSellerOrders = async (req: Request, res: Response) => {
+    const sellerId = req.userTokenData?.id;
+
+    if (!sellerId) {
+      throw CustomError.unauthorized('Usuario no autenticado');
+    }
+
+    const orders = await this.getSellerOrdersService.execute(sellerId);
 
     return res.status(200).json(orders);
   };

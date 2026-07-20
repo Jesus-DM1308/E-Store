@@ -8,6 +8,7 @@ export * from './services/order-status-policy.service.js';
 // Entities
 export * from './entities/order.entity.js';
 export * from './entities/order-detail.entity.js';
+export * from './entities/seller-order.entity.js';
 
 // Datasources
 export * from './datasources/order.datasource.js';

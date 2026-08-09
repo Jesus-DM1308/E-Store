@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { db, productsTable } from "../../../../shared/infrastructure/index.js";
+import { db, addressTable } from "../../../../shared/infrastructure/index.js";
 import { AddressEntity, AddressDatasource } from "../../domain/index.js";
 import { CreateAddressDto, UpdateAddressDto } from "../../application/index.js";
 import { AddressMapper } from "../mappers/address.mapper.js";
@@ -14,6 +14,14 @@ export class DrizzleAddressDataSource extends AddressDatasource {
             return null;
         };
         return AddressMapper.toEntity(address);
+    };
+
+    async getAllByUserId( user_id: string ): Promise<AddressEntity[]> {
+        const addresses = await db
+            .select()
+            .from(addressTable)
+            .where(eq(addressTable.user_id, user_id));
+        return addresses.map(AddressMapper.toEntity);
     };
 
     async getAll( ): Promise<AddressEntity[]> {
@@ -39,7 +47,7 @@ export class DrizzleAddressDataSource extends AddressDatasource {
                                     ...updateAddressDto.props,
                                     updated_at: new Date()
                                 })
-                                .where(eq( productsTable.id, id))
+                                .where(eq( addressTable.id, id))
                                 .returning();
         if (!address) {
             return null;
@@ -60,7 +68,7 @@ export class DrizzleAddressDataSource extends AddressDatasource {
     async findByName( name: string ): Promise<AddressEntity | null>{
         const [address] = await db.select()
                                 .from( addressTable )
-                                .where(eq( addressTable.name, name));
+                                .where(eq( addressTable.street, name));
         if (!address) {
             return null;
         }

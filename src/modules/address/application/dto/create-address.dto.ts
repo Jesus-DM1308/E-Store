@@ -1,17 +1,16 @@
 import { CustomError } from "../../../../shared/domain/index.js";
 
-interface CreateProductProps{
+interface CreateAddressProps{
     street: string,
     colony: string,
     references: string,
     postal_code: string,
-    updatedAt: Date;
-    createdAt: Date;
+    user_id: string,
 };
 
 export class CreateAddressDto{
     private constructor(
-        public readonly props: CreateProductProps
+        public readonly props: CreateAddressProps
     ){};
     
     static create( object: {[key: string]: any}): CreateAddressDto{
@@ -20,13 +19,15 @@ export class CreateAddressDto{
             colony,
             references,
             postal_code,
-            updatedAt = new Date(),
-            createdAt = new Date(),
+            user_id, 
         } = object;
 
-        //Existence of Attributes
         if(!street || !colony || !references || !postal_code){
-            throw CustomError.badRequest('LLenar Todos los Campos Solicitados');
+            throw CustomError.badRequest('Llenar Todos los Campos Solicitados');
+        };
+
+        if(!user_id){
+            throw CustomError.badRequest('user_id es requerido');
         };
 
         if( typeof(street)      !== 'string' || 
@@ -37,16 +38,12 @@ export class CreateAddressDto{
             throw CustomError.badRequest('Error en Tipo de Datos');
         };
 
-        if (street.length > 300 || colony.length > 300) {
-            throw CustomError.badRequest('Calle y Colonia Deben ser Menor a 300 Caracteres');
+        if (street.length > 255 || colony.length > 255) { 
+            throw CustomError.badRequest('Calle y Colonia deben ser menor a 255 caracteres');
         }
 
         if (!(postal_code.length === 5)) {
-            throw CustomError.badRequest('Error en Postal code');
-        }
-
-        if (!updatedAt || !createdAt) {
-            throw CustomError.badRequest('Error en UpdatedAt y CreatedAt dto')
+            throw CustomError.badRequest('El código postal debe tener 5 dígitos');
         }
 
         return new CreateAddressDto({
@@ -54,8 +51,7 @@ export class CreateAddressDto{
             colony,
             references,
             postal_code,
-            updatedAt,
-            createdAt,
+            user_id,
         });
     };
     

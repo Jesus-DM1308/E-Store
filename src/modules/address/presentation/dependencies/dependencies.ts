@@ -1,7 +1,7 @@
 import { DrizzleAddressDataSource } from "../../infrastructure/index.js";
 import { AddressRepositoryImpl } from "../../infrastructure/index.js";
 import { CreateAddressService, UpdateAddressService, DeleteAddressService, GetAddressService } from "../../application/index.js";
-import { AddressController } from "../index.js"
+import { AddressController } from "../controllers/address.controller.js" // NO CAMBIAR, PORQUE OCURRE UN ERROR
 
 
 const datasource = new DrizzleAddressDataSource();

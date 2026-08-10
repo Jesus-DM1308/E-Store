@@ -4,8 +4,8 @@ interface CreateAddressProps{
     street: string,
     colony: string,
     references: string,
-    postal_code: string,
-    user_id: string,
+    postalCode: string,
+    userId: string,
 };
 
 export class CreateAddressDto{
@@ -18,22 +18,22 @@ export class CreateAddressDto{
             street,
             colony,
             references,
-            postal_code,
-            user_id, 
+            postalCode,
+            userId,
         } = object;
 
-        if(!street || !colony || !references || !postal_code){
+        if(!street || !colony || !references || !postalCode){
             throw CustomError.badRequest('Llenar Todos los Campos Solicitados');
         };
 
-        if(!user_id){
-            throw CustomError.badRequest('user_id es requerido');
+        if(!userId){
+            throw CustomError.badRequest('userId es requerido');
         };
 
         if( typeof(street)      !== 'string' || 
             typeof(colony)      !== 'string' || 
             typeof(references)  !== 'string' || 
-            typeof(postal_code) !== 'string'
+            typeof(postalCode) !== 'string'
         ){
             throw CustomError.badRequest('Error en Tipo de Datos');
         };
@@ -42,7 +42,7 @@ export class CreateAddressDto{
             throw CustomError.badRequest('Calle y Colonia deben ser menor a 255 caracteres');
         }
 
-        if (!(postal_code.length === 5)) {
+        if (!(postalCode.length === 5)) {
             throw CustomError.badRequest('El código postal debe tener 5 dígitos');
         }
 
@@ -50,8 +50,8 @@ export class CreateAddressDto{
             street,
             colony,
             references,
-            postal_code,
-            user_id,
+            postalCode,
+            userId,
         });
     };
     

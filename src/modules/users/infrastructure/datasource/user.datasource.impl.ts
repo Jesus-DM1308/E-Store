@@ -9,7 +9,6 @@ import type {
 import { UserEntity, type UserDatasource } from '../../domain/index.js';
 import { BcryptAdapter } from '../../../../config/bcrypt.adapter.js';
 import { CustomError } from '../../../../shared/domain/errors/custom-error.js';
-import e from 'express';
 
 export class UserDatasourceImpl implements UserDatasource {
   async create(registerUserDto: RegisterUserDto): Promise<UserEntity> {

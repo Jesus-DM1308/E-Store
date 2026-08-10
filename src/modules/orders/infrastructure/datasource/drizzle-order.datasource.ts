@@ -1,4 +1,4 @@
-import { and, eq, inArray, sql } from 'drizzle-orm';
+import { and, eq, gte, inArray, sql } from 'drizzle-orm';
 import {
   db,
   orderDetailTable,
@@ -172,6 +172,28 @@ export class DrizzleOrderDatasource extends OrderDatasource {
     return sellerOrders;
   }
 
+  async isSellerAssignedToOrder(
+    orderId: number,
+    sellerId: string,
+  ): Promise<boolean> {
+    const [sellerOrder] = await db
+      .select({ id: orderDetailTable.id })
+      .from(orderDetailTable)
+      .innerJoin(
+        productsUsersTable,
+        eq(orderDetailTable.productUserId, productsUsersTable.id),
+      )
+      .where(
+        and(
+          eq(orderDetailTable.orderId, orderId),
+          eq(productsUsersTable.userId, sellerId),
+        ),
+      )
+      .limit(1);
+
+    return !!sellerOrder;
+  }
+
   async getAll(): Promise<OrderEntity[]> {
     const orders = await db.select().from(ordersTable);
 
@@ -304,13 +326,25 @@ export class DrizzleOrderDatasource extends OrderDatasource {
           unitPrice: sellerProduct.price,
         });
 
-        await tx
+        const [updatedSellerProduct] = await tx
           .update(productsUsersTable)
           .set({
             stock: sql`${productsUsersTable.stock} - ${detail.quantity}`,
             updatedAt: new Date(),
           })
-          .where(eq(productsUsersTable.id, detail.productUserId));
+          .where(
+            and(
+              eq(productsUsersTable.id, detail.productUserId),
+              gte(productsUsersTable.stock, detail.quantity),
+            ),
+          )
+          .returning();
+
+        if (!updatedSellerProduct) {
+          throw CustomError.badRequest(
+            `El producto ${sellerProduct.productName} no tiene stock suficiente.`,
+          );
+        }
       }
 
       return OrderMapper.toEntity(order);

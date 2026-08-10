@@ -9,11 +9,22 @@ import { UpdateOrderStatusDto } from '../index.js';
 export class UpdateOrderStatusService {
   constructor(private readonly orderRepository: OrderRepository) {}
 
-  async execute(id: number, updateOrderStatusDto: UpdateOrderStatusDto) {
+  async execute(
+    id: number,
+    updateOrderStatusDto: UpdateOrderStatusDto,
+    sellerId: string,
+  ) {
     const order = await this.orderRepository.getById(id);
 
     if (!order) {
       throw CustomError.notFound('La id de la orden ingresada no existe.');
+    }
+
+    const sellerCanUpdateOrder =
+      await this.orderRepository.isSellerAssignedToOrder(id, sellerId);
+
+    if (!sellerCanUpdateOrder) {
+      throw CustomError.forbidden('No puedes actualizar esta orden.');
     }
 
     const currentStatusCode = await this.orderRepository.getStatusCodeById(

@@ -16,11 +16,11 @@ export class DrizzleAddressDataSource extends AddressDatasource {
         return AddressMapper.toEntity(address);
     };
 
-    async getAllByUserId( user_id: string ): Promise<AddressEntity[]> {
+    async getAllByUserId( userId: string ): Promise<AddressEntity[]> {
         const addresses = await db
             .select()
             .from(addressTable)
-            .where(eq(addressTable.user_id, user_id));
+            .where(eq(addressTable.userId, userId));
         return addresses.map(AddressMapper.toEntity);
     };
 
@@ -45,7 +45,7 @@ export class DrizzleAddressDataSource extends AddressDatasource {
         const [address] = await db.update( addressTable )
                                 .set({
                                     ...updateAddressDto.props,
-                                    updated_at: new Date()
+                                    updatedAt: new Date()
                                 })
                                 .where(eq( addressTable.id, id))
                                 .returning();

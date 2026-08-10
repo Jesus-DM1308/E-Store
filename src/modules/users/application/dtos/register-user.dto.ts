@@ -49,6 +49,9 @@ export class RegisterUserDto {
       throw CustomError.badRequest('Invalid email format');
     }
 
+    if (!password || typeof password !== 'string') {
+      throw CustomError.badRequest('Password property is required');
+    }
     password = password.trim();
     if (!password) {
       throw CustomError.badRequest('Password property is required');

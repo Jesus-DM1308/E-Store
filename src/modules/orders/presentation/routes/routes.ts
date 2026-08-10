@@ -41,7 +41,7 @@ export class OrdersRoutes {
     router.patch(
       '/:id/status',
       catchAsync(AuthMiddleware.validateJWT),
-      catchAsync(AuthMiddleware.validateRoles(CLIENT)),
+      catchAsync(AuthMiddleware.validateRoles(SELLER)),
       catchAsync(ordersController.updateStatus),
     );
 

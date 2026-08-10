@@ -5,24 +5,24 @@ export class AddressMapper {
     static toEntity( object: { [ key: string ]: any } ): AddressEntity{
         const {
             id,
-            user_id,
+            userId,
             street,
             colony,
             references,
-            postal_code,
-            updated_at,
-            created_at,
+            postalCode,
+            updatedAt,
+            createdAt,
         } = object;
 
         return new AddressEntity(
             id,
-            user_id,
+            userId,
             street,
             colony,
             references,
-            postal_code,
-            updated_at,   
-            created_at,    
+            postalCode,
+            updatedAt,
+            createdAt,
         );
     };
 };

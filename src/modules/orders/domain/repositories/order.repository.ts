@@ -11,6 +11,10 @@ export abstract class OrderRepository {
   abstract getSellerOrdersByStatus(
     sellerId: string,
   ): Promise<SellerOrdersByStatus>;
+  abstract isSellerAssignedToOrder(
+    orderId: number,
+    sellerId: string,
+  ): Promise<boolean>;
   abstract getDetailsByOrderId(orderId: number): Promise<OrderDetailEntity[]>;
   abstract getStatusIdByCode(
     statusCode: OrderStatusCode,

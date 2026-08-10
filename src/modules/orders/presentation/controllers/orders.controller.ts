@@ -91,8 +91,18 @@ export class OrdersController {
 
   updateStatus = async (req: Request, res: Response) => {
     const id = this.getPositiveIntegerId(req);
+    const sellerId = req.userTokenData?.id;
+
+    if (!sellerId) {
+      throw CustomError.unauthorized('Usuario no autenticado');
+    }
+
     const dto = UpdateOrderStatusDto.create(req.body);
-    const order = await this.updateOrderStatusService.execute(id, dto);
+    const order = await this.updateOrderStatusService.execute(
+      id,
+      dto,
+      sellerId,
+    );
 
     return res.status(200).json({
       message: 'El estado de la orden ha sido actualizado exitosamente.',

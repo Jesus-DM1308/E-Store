@@ -13,8 +13,8 @@ export class CreateAddressService{
             street,
             colony,
             references,
-            postal_code,
-            user_id,
+            postalCode,
+            userId,
         } = data.props;
 
         if(!street){
@@ -29,12 +29,12 @@ export class CreateAddressService{
             throw CustomError.badRequest('Error en References');
         };
 
-        if(!postal_code){
+        if(!postalCode){
             throw CustomError.badRequest('Error en Postal code');
         };
 
-        if(!user_id){
-            throw CustomError.badRequest('Error en user_id');
+        if(!userId){
+            throw CustomError.badRequest('Error en userId');
         };
         
         return await this.AddressRepository.create( data );

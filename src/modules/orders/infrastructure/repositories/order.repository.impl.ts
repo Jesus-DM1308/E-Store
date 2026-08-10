@@ -26,6 +26,13 @@ export class OrderRepositoryImpl implements OrderRepository {
     return this.orderDatasource.getSellerOrdersByStatus(sellerId);
   }
 
+  async isSellerAssignedToOrder(
+    orderId: number,
+    sellerId: string,
+  ): Promise<boolean> {
+    return this.orderDatasource.isSellerAssignedToOrder(orderId, sellerId);
+  }
+
   async getDetailsByOrderId(orderId: number): Promise<OrderDetailEntity[]> {
     return this.orderDatasource.getDetailsByOrderId(orderId);
   }

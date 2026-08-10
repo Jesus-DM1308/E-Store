@@ -10,6 +10,10 @@ export class AddressRepositoryImpl implements AddressRepository {
         return this.AddressDatasource.getById( id );
     };
 
+    async getAllByUserId( userId: string ): Promise<AddressEntity[]> {
+        return this.AddressDatasource.getAllByUserId( userId );
+    };
+
     async getAll( ): Promise<AddressEntity[]> {
         return this.AddressDatasource.getAll();
     };

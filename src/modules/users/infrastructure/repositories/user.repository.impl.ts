@@ -1,35 +1,40 @@
-import type {
-  UserDatasource,
-  UserEntity,
-  UserRepository,
-} from '../../domain/index.ts';
+import type { UserDatasource, UserEntity, UserRepository } from "../../domain/index.ts";
 import { RegisterUserDto } from '../../application/index.js';
-import type { UpdateUserDto } from '../../application/index.ts';
+import type { UpdateUserDto } from "../../application/index.ts";
+
+
+
 
 export class UserRepositoryImpl implements UserRepository {
-  constructor(private readonly datasource: UserDatasource) {}
 
-  create(registerUserDto: RegisterUserDto): Promise<UserEntity> {
-    return this.datasource.create(registerUserDto);
-  }
 
-  getAll(): Promise<UserEntity[]> {
-    return this.datasource.getAll();
-  }
+    constructor(
+        private readonly datasource: UserDatasource
+    ){}
 
-  findById(id: string): Promise<UserEntity> {
-    return this.datasource.findById(id);
-  }
+    create( registerUserDto: RegisterUserDto):Promise<UserEntity> {
+        return this.datasource.create( registerUserDto );
+    }
 
-  updateById(updateUserDto: UpdateUserDto): Promise<UserEntity> {
-    return this.datasource.updateById(updateUserDto);
-  }
 
-  deleteById(id: string): Promise<UserEntity> {
-    return this.datasource.deleteById(id);
-  }
+    getAll(): Promise<UserEntity[]> {
+        return this.datasource.getAll();
+    }
 
-  async findByEmail(email: string): Promise<UserEntity | null> {
-    return this.datasource.findByEmail(email);
-  }
+    findById(id: string): Promise<UserEntity> {
+        return this.datasource.findById( id );
+    }
+
+    updateById(updateUserDto: UpdateUserDto ): Promise<UserEntity> {
+        return this.datasource.updateById( updateUserDto );
+    }
+
+    deleteById(id: string): Promise<UserEntity> {
+        return this.datasource.deleteById( id );
+    }
+
+    async findByEmail( email: string ): Promise<UserEntity | null> {
+        return this.datasource.findByEmail( email );
+    }
+    
 }

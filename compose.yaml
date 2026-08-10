@@ -8,9 +8,9 @@ services:
       - .env
 
     environment:
-      POSTGRES_DB: address
-      POSTGRES_USER: papu
-      POSTGRES_PASSWORD: 12345678
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
     ports:
       - "5437:5432"

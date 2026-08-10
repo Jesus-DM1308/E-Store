@@ -3,7 +3,7 @@ import { JwtAdapter } from '../../../config/jwt.adapter.js';
 import { CustomError } from '../../domain/errors/custom-error.js';
 
 export class AuthMiddleware {
-  static validateJWT = async (req: any, res: Response, next: NextFunction) => {
+  static validateJWT = async (req: Request, res: Response, next: NextFunction) => {
     const authorization = req.header(`Authorization`);
 
     if (!authorization) {
@@ -28,7 +28,7 @@ export class AuthMiddleware {
   };
 
   static validateRoles = (...roles: string[]) => {
-    return (req: any, res: Response, next: NextFunction) => {
+    return (req: Request, res: Response, next: NextFunction) => {
       const user = req.userTokenData;
       if (!user) {
         throw CustomError.unauthorized(`User not authenticated`);

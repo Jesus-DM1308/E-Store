@@ -1,129 +1,148 @@
-import { eq, and } from 'drizzle-orm';
-import { db } from '../../../../shared/infrastructure/database/drizzle-orm/connection.js';
-import { usersTable } from '../../../../shared/infrastructure/database/drizzle-orm/schema.js';
+import { eq, and } from "drizzle-orm";
+import { db } from "../../../../shared/infrastructure/database/drizzle-orm/connection.js";
+import { usersTable } from "../../../../shared/infrastructure/database/drizzle-orm/schema.js";
+import type { RegisterUserDto, UpdateUserDto } from "../../application/index.js";
+import { UserEntity, type UserDatasource } from "../../domain/index.js";
+import { BcryptAdapter } from "../../../../config/bcrypt.adapter.js";
+import { CustomError } from "../../../../shared/domain/errors/custom-error.js";
+import { UserMapper } from "../index.js";
 
-import type {
-  RegisterUserDto,
-  UpdateUserDto,
-} from '../../application/index.js';
-import { UserEntity, type UserDatasource } from '../../domain/index.js';
-import { BcryptAdapter } from '../../../../config/bcrypt.adapter.js';
-import { CustomError } from '../../../../shared/domain/errors/custom-error.js';
 
-export class UserDatasourceImpl implements UserDatasource {
-  async create(registerUserDto: RegisterUserDto): Promise<UserEntity> {
-    // const existUser = await this.findByEmail(registerUserDto.email);
-    // if(existUser){
-    //     throw CustomError.conflict(`Email ${registerUserDto.email} is already registered`)
-    // }
+export class UserDatasourceImpl implements UserDatasource{
 
-    const [user] = await db
-      .insert(usersTable)
-      .values({
-        name: registerUserDto.name,
-        lastName: registerUserDto.lastName,
-        email: registerUserDto.email,
-        password: registerUserDto.password,
-        cel: registerUserDto.cel,
-        userType: registerUserDto.userType,
-      })
-      .returning();
 
-    return UserEntity.fromObject(user!);
-  }
+    async create(registerUserDto: RegisterUserDto): Promise<UserEntity> {
 
-  async getAll(): Promise<UserEntity[]> {
-    const users = await db.select().from(usersTable);
-    return users.map((user) => UserEntity.fromObject(user));
-  }
+        // const existUser = await this.findByEmail(registerUserDto.email);
+        // if(existUser){
+        //     throw CustomError.conflict(`Email ${registerUserDto.email} is already registered`)
+        // }
 
-  async findById(id: string): Promise<UserEntity> {
-    const [user] = await db
-      .select()
-      .from(usersTable)
-      .where(and(eq(usersTable.id, id), eq(usersTable.isActive, true)));
+        const [user] = await db.insert(usersTable).values({
+                name: registerUserDto.name,
+                lastName: registerUserDto.lastName,
+                email: registerUserDto.email,
+                password: registerUserDto.password,
+                cel: registerUserDto.cel,
+                userType: registerUserDto.userType,
+        }).returning();
 
-    if (!user) throw CustomError.notFound(`User with id ${id} not found`);
-    return UserEntity.fromObject(user);
-  }
+        return UserMapper.toEntity( user! )
 
-  async updateById(updateUserDto: UpdateUserDto): Promise<UserEntity> {
-    const currentUser = await this.findById(updateUserDto.id);
-
-    const dataToUpdate = updateUserDto.values;
-
-    if (dataToUpdate.email && dataToUpdate.email !== currentUser.email) {
-      const userWithThatEmail = await this.findByEmail(dataToUpdate.email);
-
-      // existe ese correo y NO es el usuario actual ?
-      if (userWithThatEmail && userWithThatEmail.id !== updateUserDto.id) {
-        throw CustomError.badRequest(
-          'El correo electrónico ya se encuentra registrado por otro usuario.',
-        );
-      }
     }
 
-    if (dataToUpdate.password) {
-      dataToUpdate.password = BcryptAdapter.hash(dataToUpdate.password);
+
+    async getAll(): Promise<UserEntity[]> {
+
+        const users = await db.select().from(usersTable);
+        
+        
+        return users.map( user => UserMapper.toEntity( user ));
+        
     }
 
-    const [updatedUser] = await db
-      .update(usersTable)
-      .set(dataToUpdate)
-      .where(
-        and(eq(usersTable.id, updateUserDto.id), eq(usersTable.isActive, true)),
-      )
-      .returning();
+    async findById(id: string): Promise<UserEntity> {
 
-    if (!updatedUser) {
-      throw CustomError.badRequest('No se pudo actualizar el usuario.');
+        const [user] = await db.select()
+            .from(usersTable)
+            .where(and(
+                eq(usersTable.id, id),
+                eq(usersTable.isActive, true)
+            ));
+    
+        if(!user) throw CustomError.notFound(`User with id ${ id } not found`);
+        
+        
+        return UserMapper.toEntity(user);
+
     }
 
-    return UserEntity.fromObject(updatedUser!);
-  }
 
-  private applyTimestampEmail(originalEmail: string): string {
-    const timestamp = Date.now();
-    const [user, domain] = originalEmail.split('@');
-    return `${user}+deleted${timestamp}@${domain}`;
-  }
+    async updateById(updateUserDto: UpdateUserDto): Promise<UserEntity> {
+        
+        const currentUser = await this.findById( updateUserDto.id );
 
-  async deleteById(id: string): Promise<UserEntity> {
-    const userFound = await this.findById(id);
+        const dataToUpdate = updateUserDto.values;
 
-    const modifiedEmail = this.applyTimestampEmail(userFound.email);
+        if ( dataToUpdate.email && dataToUpdate.email !== currentUser.email ) {
+            const userWithThatEmail = await this.findByEmail( dataToUpdate.email );
+            
+            // existe ese correo y NO es el usuario actual ?
+            if ( userWithThatEmail && userWithThatEmail.id !== updateUserDto.id ) {
+                throw CustomError.badRequest('El correo electrónico ya se encuentra registrado por otro usuario.');
+            }
+        }
+       
+        if( dataToUpdate.password ){
+            dataToUpdate.password = BcryptAdapter.hash( dataToUpdate.password );
+        }
 
-    const response = await db
-      .update(usersTable)
-      .set({
-        isActive: false,
-        deletedAt: new Date(),
-        email: modifiedEmail,
-      })
-      .where(eq(usersTable.id, id))
-      .returning();
-
-    const deletedUser = response[0];
-
-    if (!deletedUser) {
-      throw CustomError.internalServer();
+        const [updatedUser] = await db.update(usersTable)
+            .set( dataToUpdate )
+            .where(and(
+                eq( usersTable.id, updateUserDto.id ),
+                eq(usersTable.isActive, true)
+            ))
+            .returning();
+        
+        if ( !updatedUser ) {
+            throw CustomError.badRequest('No se pudo actualizar el usuario.');
+        }
+    
+        
+        return UserMapper.toEntity( updatedUser! );
+        
     }
 
-    return UserEntity.fromObject(deletedUser);
+    private applyTimestampEmail(originalEmail: string ): string{
+        const timestamp = Date.now(); 
+        const [user, domain] = originalEmail.split('@');
+        return `${user}+deleted${timestamp}@${domain}`;
+    }
 
-    // const [deleted] = await db.delete(usersTable)
-    //     .where(eq( usersTable.id, id ))
-    //     .returning();
-  }
+    async deleteById(id: string): Promise<UserEntity> {
+        const userFound = await this.findById( id );
 
-  async findByEmail(email: string): Promise<UserEntity | null> {
-    const [user] = await db
-      .select()
-      .from(usersTable)
-      .where(and(eq(usersTable.email, email), eq(usersTable.isActive, true)));
+        const modifiedEmail = this.applyTimestampEmail(userFound.email);
+        
+        const response = await db.update(usersTable)
+        .set({ 
+            isActive: false,
+            deletedAt: new Date(),
+            email: modifiedEmail
+        })
+        .where(eq(usersTable.id, id))
+        .returning();
+        
+        const deletedUser = response[0];
+        
+        if(!deletedUser){
+            throw CustomError.internalServer();
+        }
+        
 
-    if (!user) return null;
+        return UserMapper.toEntity( deletedUser );
+        
+        // const [deleted] = await db.delete(usersTable)
+        //     .where(eq( usersTable.id, id ))
+        //     .returning();
 
-    return UserEntity.fromObject(user);
-  }
+    }
+
+    
+    async findByEmail( email: string ): Promise<UserEntity | null> {
+        
+        const [user] = await db.select()
+            .from( usersTable )
+            .where( and(
+                eq( usersTable.email, email ),
+                eq(usersTable.isActive, true)
+            ))
+
+        if ( !user ) return null;
+
+
+        return UserMapper.toEntity( user );
+    }
+    
 }

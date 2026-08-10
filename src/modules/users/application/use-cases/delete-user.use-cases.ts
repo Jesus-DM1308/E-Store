@@ -1,48 +1,56 @@
-import { CustomError } from '../../../../shared/domain/errors/custom-error.js';
-import {
-  OrderRepository,
-  OrderStatusCode,
-} from '../../../orders/domain/index.js';
-import type { UserEntity, UserRepository } from '../../domain/index.js';
+import { CustomError } from "../../../../shared/domain/errors/custom-error.js";
+import { OrderRepository } from "../../../orders/domain/index.js";
+import type { UserEntity, UserRepository } from "../../domain/index.js";
+import { OrderStatusCode } from "../../../orders/domain/index.js";
+
+
 
 export interface DeleteUserUseCases {
-  execute(id: string): Promise<UserEntity>;
+    execute( id: string ): Promise<UserEntity>;
 }
 
+
+
 export class DeleteUser implements DeleteUserUseCases {
-  constructor(
-    private readonly repository: UserRepository,
-    private readonly orderRepository: OrderRepository,
-  ) {}
 
-  async execute(id: string): Promise<UserEntity> {
-    const userOrders = await this.orderRepository.getAllByUserId(id);
 
-    const terminalStatuses = [
-      OrderStatusCode.CANCELLED,
-      OrderStatusCode.DELIVERED,
-      OrderStatusCode.REFUNDED,
-    ];
+    constructor(
+        private readonly repository: UserRepository,
+        private readonly orderRepository: OrderRepository
+    ){}
 
-    let hasActiveOrders = false;
+    async execute(id: string): Promise<UserEntity> {
 
-    for (const order of userOrders) {
-      const statusCode = await this.orderRepository.getStatusCodeById(
-        order.statusId,
-      );
+        const userOrders = await this.orderRepository.getAllByUserId(id);
 
-      if (!statusCode || !terminalStatuses.includes(statusCode)) {
-        hasActiveOrders = true;
-        break;
-      }
+        if (userOrders.length === 0) {
+            return this.repository.deleteById(id);
+        }
+
+        const cancelledId = await this.orderRepository.getStatusIdByCode(OrderStatusCode.CANCELLED);
+        const deliveredId = await this.orderRepository.getStatusIdByCode(OrderStatusCode.DELIVERED);
+        const refundedId = await this.orderRepository.getStatusIdByCode(OrderStatusCode.REFUNDED);
+
+
+        if (!cancelledId || !deliveredId || !refundedId) {
+            throw CustomError.internalServer();
+        }
+
+        
+        const inactiveStatusIds = [cancelledId, deliveredId, refundedId];
+
+        const hasActiveOrders = userOrders.some(order => 
+            !inactiveStatusIds.includes(order.statusId)
+        );
+
+        if( hasActiveOrders ){
+            throw CustomError.badRequest(
+                'No puedes dar de baja tu cuenta porque tienes órdenes activas en proceso de entrega o pago.'
+            )
+        }
+            
+      
+        return this.repository.deleteById( id );
     }
 
-    if (hasActiveOrders) {
-      throw CustomError.badRequest(
-        'No puedes dar de baja tu cuenta porque tienes órdenes activas en proceso de entrega o pago.',
-      );
-    }
-
-    return this.repository.deleteById(id);
-  }
 }

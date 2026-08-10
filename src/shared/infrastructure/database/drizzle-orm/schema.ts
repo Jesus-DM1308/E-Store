@@ -24,17 +24,15 @@ export const usersTable = pgTable(`user`, {
   updatedAt: timestamp(`updated_at`).defaultNow().notNull(),
 });
 
-export const addressTable = pgTable(`address`, {
-  id: integer(`id`).primaryKey().generatedAlwaysAsIdentity().notNull(),
-  userId: uuid(`user_id`)
-    .notNull()
-    .references(() => usersTable.id, { onDelete: 'restrict' }),
-  street: varchar(`street`, { length: 255 }).notNull(),
-  colony: varchar(`colony`, { length: 255 }).notNull(),
-  references: varchar(`references`, { length: 255 }).notNull(),
-  postalCode: varchar(`postal_code`, { length: 255 }).notNull(),
-  updatedAt: timestamp(`updated_at`).defaultNow().notNull(),
-  createdAt: timestamp(`created_at`).defaultNow().notNull(),
+export const addressTable = pgTable("address", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
+  user_id: uuid().notNull().references(() => usersTable.id, { onDelete: 'cascade' }),
+  street: varchar({length: 255}).notNull(),
+  colony: varchar({length: 255}).notNull(),
+  references: varchar({length: 255}).notNull(),
+  postal_code: varchar({length: 255}).notNull(),
+  updated_at: timestamp().defaultNow().notNull(),
+  created_at: timestamp().defaultNow().notNull(),
 });
 
 export const productsTable = pgTable(`products`, {

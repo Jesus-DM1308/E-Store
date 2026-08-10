@@ -1,12 +1,3 @@
-declare global {
-  namespace Express {
-    interface Request {
-      userTokenData?: {
-        id: string;
-        role: string;
-      };
-    }
-  }
-}
+// Esta declaración se mantiene como archivo vacío para evitar conflictos de tipos duplicados.
 
 export {};

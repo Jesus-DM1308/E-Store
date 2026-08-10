@@ -25,7 +25,7 @@ export class UpdateUserDto {
 
     if (this.userType) returnObj['userType'] = this.userType;
 
-    //if( this.updatedAt ) returnObj['updated_at'] = this.updatedAt;
+        if( this.lastName ) returnObj['lastName'] = this.lastName;
 
     returnObj['updatedAt'] = new Date();
 
